@@ -1,0 +1,29 @@
+{
+  "name": "h4kuna/queue",
+  "type": "library",
+  "description": "System V message queue in php.",
+  "homepage": "https://github.com/h4kuna/queue",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Milan Matějček",
+      "email": "milan.matejcek@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "ext-sysvmsg": "*",
+    "h4kuna/memoize": "*"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^0.11",
+    "nette/tester": "^2.3",
+    "tracy/tracy": "^2.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "h4kuna\\Queue\\": "src/"
+    }
+  }
+}
