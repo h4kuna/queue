@@ -34,7 +34,7 @@ final class Producer
 	private function save(string $message, int $messageType, bool $blocking): void
 	{
 		if ($messageType <= 0) {
-			throw new SendException(sprintf('Message type MUST be greater than 0.'));
+			throw new SendException('Message type MUST be greater than 0.');
 		}
 
 		$error = 0;
