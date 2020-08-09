@@ -9,7 +9,7 @@ final class Queue
 {
 	use MemoryStorage;
 
-	public const MAX_MESSAGE_SIZE_NO_DEFINED = 0;
+	public const MAX_MESSAGE_SIZE = 8192;
 
 	/** @var string */
 	private $name;
@@ -27,7 +27,7 @@ final class Queue
 	private $maxMessageSize;
 
 
-	public function __construct(string $name, int $key, int $permission, int $maxMessageSize = self::MAX_MESSAGE_SIZE_NO_DEFINED)
+	public function __construct(string $name, int $key, int $permission, int $maxMessageSize = self::MAX_MESSAGE_SIZE)
 	{
 		$this->name = $name;
 		$this->key = $key;
@@ -81,9 +81,6 @@ final class Queue
 
 	public function messageSizeBytes(): int
 	{
-		if ($this->maxMessageSize === self::MAX_MESSAGE_SIZE_NO_DEFINED) {
-			return $this->sizeBytes() / 2;
-		}
 		return $this->maxMessageSize;
 	}
 
