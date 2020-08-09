@@ -2,7 +2,7 @@
 
 namespace h4kuna\Queue;
 
-use h4kuna\Queue\Exceptions\SendException;
+use h4kuna\Queue\Exceptions;
 
 final class Producer
 {
@@ -34,7 +34,7 @@ final class Producer
 	private function save(string $message, int $messageType, bool $blocking): void
 	{
 		if ($messageType <= 0) {
-			throw new SendException('Message type MUST be greater than 0.');
+			throw new Exceptions\SendException('Message type MUST be greater than 0.');
 		}
 
 		$error = 0;
@@ -42,11 +42,17 @@ final class Producer
 		if (!$success || $error !== 0) {
 			switch ($error) {
 				case 11:
-					throw new SendException(sprintf('Queue "%s" is full, allowed size is "%s" %s.', $this->queue->fullname(), $this->queue->sizeBytes(), self::errorMessage()));
+					try {
+						$bytesSize = $this->queue->info()[$this->queue::INFO_BYTES];
+					} catch (Exceptions\QueueInfoIsUnavailableException $e) {
+						$bytesSize = 'unavailable';
+					}
+
+					throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s" %s.', $this->queue->fullname(), $bytesSize, self::errorMessage()));
 				case 22:
-					throw new SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->queue->fullname(), $this->queue->messageSizeBytes(), strlen($message)));
+					throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->queue->fullname(), $this->queue->messageSizeBytes(), strlen($message)));
 			}
-			throw new SendException(sprintf('Message is not saved to queue "%s" with code "%s" with error message: "%s".', $this->queue->fullname(), $error, self::errorMessage()), $error);
+			throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" with code "%s" with error message: "%s".', $this->queue->fullname(), $error, self::errorMessage()), $error);
 		}
 	}
 
