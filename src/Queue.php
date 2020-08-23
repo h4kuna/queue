@@ -9,7 +9,7 @@ final class Queue
 {
 	use MemoryStorage;
 
-	public const MAX_MESSAGE_SIZE = 8192;
+	public const MAX_MESSAGE_SIZE = 256; // bytes, max is by system, observed 8192
 	public const INFO_UID = 'msg_perm.uid';
 	public const INFO_GID = 'msg_perm.gid';
 	public const INFO_MODE = 'msg_perm.mode';
@@ -54,7 +54,10 @@ final class Queue
 
 	public function fullname(): string
 	{
-		return $this->name . '.' . $this->key;
+		if (((int) $this->name) === $this->key) {
+			return $this->name;
+		}
+		return "$this->name.$this->key";
 	}
 
 

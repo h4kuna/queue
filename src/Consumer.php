@@ -21,7 +21,7 @@ final class Consumer
 		try {
 			return $this->read($messageType, MSG_IPC_NOWAIT);
 		} catch (ReceiveException $e) {
-			if ($e->getCode() === 42) {
+			if ($e->getCode() === MSG_ENOMSG) {
 				return NULL;
 			}
 			throw $e;
@@ -45,7 +45,6 @@ final class Consumer
 			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s" and error message "%s".', $this->queue->fullname(), $error, self::errorMessage()), $error);
 		}
 
-		// WARNING if $messageType is negative, than all $msgType are set 1
 		return new Message($message, $msgType);
 	}
 

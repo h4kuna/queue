@@ -10,10 +10,10 @@ require_once __DIR__ . '/../TestCase.php';
 final class BasicTest extends TestCase
 {
 
-	public function testRun(): void
+	public function testReceive(): void
 	{
 		/** @var Queue\QueueFactory $queue */
-		$queueFactory = new Queue\QueueFactory();
+		$queueFactory = new Queue\QueueFactory;
 
 		/** @var Queue\Queue $queue */
 		$queue = $queueFactory->create('my-queue');
@@ -21,6 +21,24 @@ final class BasicTest extends TestCase
 		$queue->producer()->send('Hello');
 
 		Assert::same('Hello', $queue->consumer()->receive()->message);
+	}
+
+
+	public function testTryReceive(): void
+	{
+		/** @var Queue\QueueFactory $queue */
+		$queueFactory = new Queue\QueueFactory;
+
+		/** @var Queue\Queue $queue */
+		$queue = $queueFactory->create('my-queue');
+
+		Assert::null($queue->consumer()->tryReceive(0));
+		Assert::null($queue->consumer()->tryReceive(0));
+		Assert::null($queue->consumer()->tryReceive(0));
+
+		$queue->producer()->send('Hello');
+
+		Assert::same('Hello', $queue->consumer()->tryReceive()->message);
 	}
 
 }

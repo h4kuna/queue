@@ -39,3 +39,6 @@ $queue->producer()->send('Hello', 2);
 $queue->consumer()->receive(Queue\Config::TYPE_ALL)->message === 'Hello'
 ```
 
+Error codes for receive:
+- [base errors](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h)
+- [extends error](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h)
