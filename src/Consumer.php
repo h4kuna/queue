@@ -39,10 +39,20 @@ final class Consumer
 	{
 		$message = '';
 		$msgType = $error = 0;
-		$success = msg_receive($this->queue->resource(), $messageType, $msgType, $this->queue->messageSizeBytes(), $message, Config::NO_SERIALIZE, $flags, $error);
+		$success = msg_receive(
+			$this->queue->resource(),
+			$messageType,
+			$msgType,
+			$this->queue->messageSizeBytes(),
+			$message,
+			Config::NO_SERIALIZE,
+			$flags,
+			$error
+		);
 
 		if (!$success || $error !== 0) {
-			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s" and error message "%s".', $this->queue->fullname(), $error, self::errorMessage()), $error);
+			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s" and error message "%s".',
+				$this->queue->fullname(), $error, self::errorMessage()), $error);
 		}
 
 		return new Message($message, $msgType);
