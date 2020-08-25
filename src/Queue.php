@@ -30,9 +30,6 @@ final class Queue
 	/** @var int */
 	private $permission;
 
-	/** @var resource|NULL */
-	private $queueId;
-
 	/** @var int */
 	private $maxMessageSize;
 
@@ -63,18 +60,13 @@ final class Queue
 
 	public function resource()
 	{
-		if ($this->queueId === null) {
-			$this->queueId = $this->createResource();
-		}
-		return $this->queueId;
+		return $this->createResource();
 	}
 
 
 	public function remove(): bool
 	{
-		$result = msg_remove_queue($this->resource());
-		$this->queueId = null;
-		return $result;
+		return msg_remove_queue($this->resource());
 	}
 
 
