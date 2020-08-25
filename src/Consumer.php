@@ -50,6 +50,10 @@ final class Consumer
 			$error
 		);
 
+		if ($error === 4 && function_exists('pcntl_signal_dispatch')) {
+			pcntl_signal_dispatch();
+		}
+
 		if (!$success || $error !== 0) {
 			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s" and error message "%s".',
 				$this->queue->fullname(), $error, self::errorMessage()), $error);
