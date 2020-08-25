@@ -126,6 +126,9 @@ final class Queue
 	}
 
 
+	/**
+	 * If you want prepare queue with master process, let's try to use remove()
+	 */
 	public function flush(): void
 	{
 		$consumer = $this->consumer();
@@ -159,9 +162,9 @@ final class Queue
 		$exists = msg_queue_exists($this->key);
 		$queue = msg_get_queue($this->key, $this->permission);
 
-		if ($exists && self::queuePermission($queue) !== $this->permission) {
+		if ($exists && ($perm = $this->queuePermission($queue)) !== $this->permission) {
 			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s".',
-				$this->key, self::queuePermission($queue), $this->permission));
+				$this->fullname(), $perm, $this->permission));
 		}
 
 		return $queue;
@@ -171,13 +174,12 @@ final class Queue
 	/**
 	 * @param resource $queue
 	 */
-	private static function queuePermission($queue): int
+	private function queuePermission($queue): int
 	{
 		$stats = msg_stat_queue($queue);
 		if (!is_array($stats)) {
-			// bad initialized queue
-			@msg_remove_queue($queue); // intentionally @
-			throw new Exceptions\CreateQueueException('Bad initialize message queue, let\'s repeat. Now is deleted.');
+			throw new Exceptions\CreateQueueException(sprintf('Bad initialize message queue, let\'s repeat or remove exist queue by: msg_remove_queue(msg_get_queue(%s, %s))',
+				$this->key, $this->permission));
 		}
 
 		return $stats[self::INFO_MODE];
