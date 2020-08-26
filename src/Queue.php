@@ -163,8 +163,8 @@ final class Queue
 		$queue = msg_get_queue($this->key, $this->permission);
 
 		if ($exists && ($perm = $this->queuePermission($queue)) !== $this->permission) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s".',
-				$this->fullname(), $perm, $this->permission));
+			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s". %s',
+				$this->fullname(), $perm, $this->permission, $this->helpHowRemove($perm)));
 		}
 
 		return $queue;
@@ -178,8 +178,8 @@ final class Queue
 	{
 		$stats = msg_stat_queue($queue);
 		if (!is_array($stats)) {
-			throw new Exceptions\CreateQueueException(sprintf('Bad initialize message queue, let\'s repeat or remove exist queue by: msg_remove_queue(msg_get_queue(%s, %s))',
-				$this->key, $this->permission));
+			throw new Exceptions\CreateQueueException(sprintf('Bad initialize message queue. %s',
+				$this->helpHowRemove($this->permission)));
 		}
 
 		return $stats[self::INFO_MODE];
@@ -193,6 +193,12 @@ final class Queue
 		}
 
 		return (new \DateTime("@$timestamp"))->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+	}
+
+
+	private function helpHowRemove(int $permission): string
+	{
+		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->key, $permission);
 	}
 
 }
