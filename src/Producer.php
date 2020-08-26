@@ -48,19 +48,12 @@ final class Producer
 						$bytesSize = 'unavailable';
 					}
 
-					throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s" %s.', $this->queue->fullname(), $bytesSize, self::errorMessage()));
+					throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s".', $this->queue->fullname(), $bytesSize));
 				case 22:
 					throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->queue->fullname(), $this->queue->messageSizeBytes(), strlen($message)));
 			}
-			throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" with code "%s" with error message: "%s".', $this->queue->fullname(), $error, self::errorMessage()), $error);
+			throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" with code "%s".', $this->queue->fullname(), $error), $error);
 		}
-	}
-
-
-	private static function errorMessage(): string
-	{
-		$message = error_get_last();
-		return $message['message'] ?? '';
 	}
 
 }

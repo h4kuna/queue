@@ -55,18 +55,11 @@ final class Consumer
 		}
 
 		if (!$success || $error !== 0) {
-			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s" and error message "%s".',
-				$this->queue->fullname(), $error, self::errorMessage()), $error);
+			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s".',
+				$this->queue->fullname(), $error), $error);
 		}
 
 		return new Message($message, $msgType);
-	}
-
-
-	private static function errorMessage(): string
-	{
-		$message = error_get_last();
-		return $message['message'] ?? '';
 	}
 
 }
