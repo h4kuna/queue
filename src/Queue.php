@@ -129,10 +129,10 @@ final class Queue
 	/**
 	 * If you want prepare queue with master process, let's try to use remove()
 	 */
-	public function flush(): void
+	public function flush(int $type = Config::TYPE_ALL): void
 	{
 		$consumer = $this->consumer();
-		while ($consumer->tryReceive(Config::TYPE_ALL) !== null) {
+		while ($consumer->tryReceive($type) !== null) {
 			;
 		}
 	}

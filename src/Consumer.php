@@ -22,7 +22,7 @@ final class Consumer
 			return $this->read($messageType, MSG_IPC_NOWAIT);
 		} catch (ReceiveException $e) {
 			if ($e->getCode() === MSG_ENOMSG) {
-				return NULL;
+				return null;
 			}
 			throw $e;
 		}
