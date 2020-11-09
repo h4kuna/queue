@@ -19,7 +19,7 @@ final class Consumer
 	public function tryReceive(int $messageType = Config::TYPE_DEFAULT): ?Message
 	{
 		try {
-			return $this->read($messageType, MSG_IPC_NOWAIT);
+			return $this->read($messageType, MSG_DONTWAIT);
 		} catch (ReceiveException $e) {
 			if ($e->getCode() === MSG_ENOMSG) {
 				return null;
@@ -37,34 +37,17 @@ final class Consumer
 
 	private function read(int $messageType, int $flags): Message
 	{
-		$message = '';
-		$msgType = $error = 0;
-		$success = msg_receive(
-			$this->queue->resource(),
-			$messageType,
-			$msgType,
-			$this->queue->messageSizeBytes(),
-			$message,
-			Config::NO_SERIALIZE,
-			$flags,
-			$error
-		);
-
-		if ($error === 4 && function_exists('pcntl_signal_dispatch')) {
-			pcntl_signal_dispatch();
+		$socket = $this->queue->resource();
+		$file = $this->queue->filename();
+		if (socket_bind($socket, $file) === false) {
+			throw new ReceiveException('Could not use socket file.');
 		}
 
-		if (!$success || $error !== 0) {
-			if ($error === 43) {
-				throw new ReceiveException(sprintf('Another process remove queue "%s", error code "%s".',
-					$this->queue->fullname(), $error), $error);
-			}
-
-			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s".',
-				$this->queue->fullname(), $error), $error);
+		if (socket_recvfrom($socket, $message, $this->queue->messageSizeBytes(), $flags, $source) === false) {
+			throw new ReceiveException('Any bug!');
 		}
 
-		return new Message($message, $msgType);
+		return new Message($message, 0);
 	}
 
 }

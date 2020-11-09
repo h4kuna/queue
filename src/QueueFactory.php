@@ -2,10 +2,14 @@
 
 namespace h4kuna\Queue;
 
+use Nette\Utils\FileSystem;
 use Nette\Utils\Validators;
 
 class QueueFactory
 {
+	/** @var string */
+	private $tempDir;
+
 	/** @var int */
 	private $permission;
 
@@ -13,8 +17,13 @@ class QueueFactory
 	private $messageSize;
 
 
-	public function __construct(int $permission = 0666, int $messageSize = Queue::MAX_MESSAGE_SIZE)
+	public function __construct(
+		string $tempDir = '',
+		int $permission = 0600,
+		int $messageSize = Queue::MAX_MESSAGE_SIZE
+	)
 	{
+		$this->tempDir = $tempDir === '' ? sys_get_temp_dir() : $tempDir;
 		$this->permission = $permission;
 		$this->messageSize = $messageSize;
 	}
@@ -29,16 +38,11 @@ class QueueFactory
 			$permission = $this->permission;
 		}
 
-		if (Validators::isNumericInt($name)) {
-			$key = (int) $name;
-		} elseif (($explodeName = self::divideName($name)) !== []) {
-			$name = $explodeName['name'];
-			$key = $explodeName['key'];
-		} else {
-			$key = static::generateKey($name, $permission, $this->messageSize);
-		}
+		FileSystem::createDir($this->tempDir);
+		$socketFile = $this->tempDir . DIRECTORY_SEPARATOR . $name . '.sock';
+		@unlink($socketFile);
 
-		return new Queue((string) $name, $key, $permission, $this->messageSize);
+		return new Queue($socketFile, $permission, $this->messageSize);
 	}
 
 

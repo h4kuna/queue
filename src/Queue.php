@@ -22,10 +22,7 @@ final class Queue
 	public const INFO_LAST_RECEIVE_PID = 'msg_lrpid';
 
 	/** @var string */
-	private $name;
-
-	/** @var int */
-	private $key;
+	private $filename;
 
 	/** @var int */
 	private $permission;
@@ -34,27 +31,17 @@ final class Queue
 	private $maxMessageSize;
 
 
-	public function __construct(string $name, int $key, int $permission, int $maxMessageSize = self::MAX_MESSAGE_SIZE)
+	public function __construct(string $filename, int $permission, int $maxMessageSize = self::MAX_MESSAGE_SIZE)
 	{
-		$this->name = $name;
-		$this->key = $key;
+		$this->filename = $filename;
 		$this->permission = $permission;
 		$this->maxMessageSize = $maxMessageSize;
 	}
 
 
-	public function name(): string
+	public function filename(): string
 	{
-		return $this->name;
-	}
-
-
-	public function fullname(): string
-	{
-		if (((int) $this->name) === $this->key) {
-			return $this->name;
-		}
-		return "$this->name.$this->key";
+		return $this->filename;
 	}
 
 
@@ -66,12 +53,14 @@ final class Queue
 
 	public function remove(): bool
 	{
+		throw new \RuntimeException('not implemented');
 		return msg_remove_queue($this->resource());
 	}
 
 
 	public function setup(array $data): bool
 	{
+		throw new \RuntimeException('not implemented');
 		$structure = [self::INFO_UID, self::INFO_GID, self::INFO_MODE, self::INFO_BYTES];
 
 		return msg_set_queue($this->resource(), array_intersect_key($data, array_fill_keys($structure, true)));
@@ -84,6 +73,7 @@ final class Queue
 	 */
 	public function info(): array
 	{
+		throw new \RuntimeException('not implemented');
 		$info = msg_stat_queue($this->resource());
 		if ($info === false) {
 			throw new Exceptions\QueueInfoIsUnavailableException;
@@ -159,30 +149,7 @@ final class Queue
 	 */
 	private function createResource()
 	{
-		$exists = msg_queue_exists($this->key);
-		$queue = msg_get_queue($this->key, $this->permission);
-
-		if ($exists && ($perm = $this->queuePermission($queue)) !== $this->permission) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s". %s',
-				$this->fullname(), $perm, $this->permission, $this->helpHowRemove($perm)));
-		}
-
-		return $queue;
-	}
-
-
-	/**
-	 * @param resource $queue
-	 */
-	private function queuePermission($queue): int
-	{
-		$stats = msg_stat_queue($queue);
-		if (!is_array($stats)) {
-			throw new Exceptions\CreateQueueException(sprintf('Bad initialize message queue. %s',
-				$this->helpHowRemove($this->permission)));
-		}
-
-		return $stats[self::INFO_MODE];
+		return socket_create(AF_UNIX, SOCK_DGRAM, 0);
 	}
 
 
@@ -193,12 +160,6 @@ final class Queue
 		}
 
 		return (new \DateTime("@$timestamp"))->setTimezone(new \DateTimeZone(date_default_timezone_get()));
-	}
-
-
-	private function helpHowRemove(int $permission): string
-	{
-		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->key, $permission);
 	}
 
 }

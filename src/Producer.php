@@ -6,9 +6,6 @@ use h4kuna\Queue\Exceptions;
 
 final class Producer
 {
-	private const BLOCKING = true;
-	private const NO_BLOCKING = false;
-
 	/** @var Queue */
 	private $queue;
 
@@ -19,41 +16,40 @@ final class Producer
 	}
 
 
-	public function send(string $message, int $messageType = Config::TYPE_DEFAULT): void
+	public function send(string $message, int $messageType = Config::TYPE_DEFAULT): int
 	{
-		$this->save($message, $messageType, self::BLOCKING);
+		return $this->save($message, $messageType, 0);
 	}
 
 
-	public function sendNonBlocking(string $message, int $messageType = Config::TYPE_DEFAULT): void
+	public function sendNonBlocking(string $message, int $messageType = Config::TYPE_DEFAULT): int
 	{
-		$this->save($message, $messageType, self::NO_BLOCKING);
+		return $this->save($message, $messageType, MSG_EOF);
 	}
 
 
-	private function save(string $message, int $messageType, bool $blocking): void
+	private function save(string $message, int $messageType, int $flags): int
 	{
 		if ($messageType <= 0) {
 			throw new Exceptions\SendException('Message type MUST be greater than 0.');
 		}
 
-		$error = 0;
-		$success = @msg_send($this->queue->resource(), $messageType, $message, Config::NO_SERIALIZE, $blocking, $error);
-		if (!$success || $error !== 0) {
-			switch ($error) {
-				case 11:
-					try {
-						$bytesSize = $this->queue->info()[$this->queue::INFO_BYTES];
-					} catch (Exceptions\QueueInfoIsUnavailableException $e) {
-						$bytesSize = 'unavailable';
-					}
-
-					throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s".', $this->queue->fullname(), $bytesSize));
-				case 22:
-					throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->queue->fullname(), $this->queue->messageSizeBytes(), strlen($message)));
-			}
-			throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" with code "%s".', $this->queue->fullname(), $error), $error);
+		$length = strlen($message);
+		if ($this->queue->messageSizeBytes() < $length) {
+			throw new Exceptions\SendException('You want send big message, let\'s allow bigger size for message.');
 		}
+
+		$socket = $this->queue->resource();
+		$file = $this->queue->filename();
+		socket_bind($socket, $file);
+		$result = socket_sendto($socket, $message, $length, $flags, $file, 0);
+		socket_close($socket);
+
+		if ($result === false) {
+			throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" failed.', $this->queue->filename()));
+		}
+
+		return $result;
 	}
 
 }

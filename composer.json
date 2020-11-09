@@ -14,6 +14,7 @@
   "require": {
     "php": ">=7.1",
     "ext-sysvmsg": "*",
+    "ext-sockets": "*",
     "h4kuna/memoize": "*"
   },
   "require-dev": {
