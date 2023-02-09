@@ -4,17 +4,9 @@ namespace h4kuna\Queue;
 
 final class Message
 {
-	/** @var string */
-	public $message;
 
-	/** @var int */
-	public $type;
-
-
-	public function __construct(string $message, int $type)
+	public function __construct(public string $message, public int $type)
 	{
-		$this->message = $message;
-		$this->type = $type;
 	}
 
 }

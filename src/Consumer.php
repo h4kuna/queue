@@ -6,13 +6,9 @@ use h4kuna\Queue\Exceptions\ReceiveException;
 
 final class Consumer
 {
-	/** @var Queue */
-	private $queue;
 
-
-	public function __construct(Queue $queue)
+	public function __construct(private Queue $queue)
 	{
-		$this->queue = $queue;
 	}
 
 

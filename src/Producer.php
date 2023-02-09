@@ -9,13 +9,9 @@ final class Producer
 	private const BLOCKING = true;
 	private const NO_BLOCKING = false;
 
-	/** @var Queue */
-	private $queue;
 
-
-	public function __construct(Queue $queue)
+	public function __construct(private Queue $queue)
 	{
-		$this->queue = $queue;
 	}
 
 
@@ -43,7 +39,7 @@ final class Producer
 			switch ($error) {
 				case 11:
 					try {
-						$bytesSize = $this->queue->info()[$this->queue::INFO_BYTES];
+						$bytesSize = $this->queue->info()[$this->queue::INFO_SETUP_BYTES];
 					} catch (Exceptions\QueueInfoIsUnavailableException $e) {
 						$bytesSize = 'unavailable';
 					}

@@ -7,7 +7,7 @@ final class Linux
 	/**
 	 * @var array<int, string>
 	 */
-	private static $permission = [
+	private static array $permission = [
 		4 => 'r',
 		2 => 'w',
 		1 => 'x',
@@ -17,7 +17,7 @@ final class Linux
 	public static function permissionInToText(int $permission): string
 	{
 		$value = decoct($permission);
-		$permissionArray = array_map('intval', str_split((string) $value));
+		$permissionArray = array_map('intval', str_split($value));
 		$output = '';
 		foreach ($permissionArray as $p) {
 			foreach (self::$permission as $num => $str) {
@@ -45,15 +45,15 @@ final class Linux
 
 		$users = $groups = [];
 		foreach ($file as $item) {
-			/** @var array $item */
+			/** @var array<string> $item */
 			if (!isset($item[0])) {
 				continue;
 			}
 			if (isset($item[2])) {
-				$users[$item[2]] = $item[0];
+				$users[intval($item[2])] = $item[0];
 			}
 			if (isset($item[3])) {
-				$groups[$item[3]] = $item[0];
+				$groups[intval($item[3])] = $item[0];
 			}
 		}
 

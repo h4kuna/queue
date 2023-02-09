@@ -4,7 +4,7 @@ namespace h4kuna\Queue\Tests;
 
 use Tester;
 
-require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 abstract class TestCase extends Tester\TestCase
 {

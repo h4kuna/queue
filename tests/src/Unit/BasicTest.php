@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue\Tests;
+namespace h4kuna\Queue\Tests\Unit;
 
 use h4kuna\Queue;
+use h4kuna\Queue\Tests\TestCase;
 use Tester\Assert;
 
 require_once __DIR__ . '/../TestCase.php';
@@ -12,10 +13,8 @@ final class BasicTest extends TestCase
 
 	public function testReceive(): void
 	{
-		/** @var Queue\QueueFactory $queue */
 		$queueFactory = new Queue\QueueFactory;
 
-		/** @var Queue\Queue $queue */
 		$queue = $queueFactory->create('my-queue');
 
 		$queue->producer()->send('Hello');
@@ -26,10 +25,8 @@ final class BasicTest extends TestCase
 
 	public function testTryReceive(): void
 	{
-		/** @var Queue\QueueFactory $queue */
 		$queueFactory = new Queue\QueueFactory;
 
-		/** @var Queue\Queue $queue */
 		$queue = $queueFactory->create('my-queue');
 
 		Assert::null($queue->consumer()->tryReceive(0));
@@ -38,7 +35,7 @@ final class BasicTest extends TestCase
 
 		$queue->producer()->send('Hello');
 
-		Assert::same('Hello', $queue->consumer()->tryReceive()->message);
+		Assert::same('Hello', $queue->consumer()->tryReceive()?->message);
 	}
 
 }

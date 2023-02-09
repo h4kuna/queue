@@ -2,36 +2,26 @@
 
 namespace h4kuna\Queue;
 
-use Nette\Utils\Validators;
-
 class QueueFactory
 {
-	/** @var int */
-	private $permission;
 
-	/** @var int */
-	private $messageSize;
-
-
-	public function __construct(int $permission = 0666, int $messageSize = Queue::MAX_MESSAGE_SIZE)
+	public function __construct(private int $permission = 0666, private int $messageSize = Queue::MAX_MESSAGE_SIZE)
 	{
-		$this->permission = $permission;
-		$this->messageSize = $messageSize;
 	}
 
 
 	/**
 	 * @param int|string $name - [name.id] is possible
 	 */
-	public function create($name, int $permission = null): Queue
+	public function create(int|string $name, int $permission = null): Queue
 	{
 		if ($permission === null) {
 			$permission = $this->permission;
 		}
 
-		if (Validators::isNumericInt($name)) {
+		if (is_numeric($name)) {
 			$key = (int) $name;
-		} elseif (($explodeName = self::divideName($name)) !== []) {
+		} elseif (($explodeName = self::divideName($name)) !== null) {
 			$name = $explodeName['name'];
 			$key = $explodeName['key'];
 		} else {
@@ -61,15 +51,22 @@ class QueueFactory
 
 
 	/**
-	 * @return array{name: string, key: int}
+	 * @return array{name: string, key: int}|null
 	 */
-	protected static function divideName(string $name): array
+	protected static function divideName(string $name): ?array
 	{
 		$explodeName = explode('.', $name, 2);
-		if (isset($explodeName[1]) && Validators::isNumericInt($explodeName[1])) {
+		if (isset($explodeName[1]) && self::isNumericInt($explodeName[1])) {
 			return ['name' => $explodeName[0], 'key' => (int) $explodeName[1]];
 		}
-		return [];
+
+		return null;
+	}
+
+
+	private static function isNumericInt(int|string $name): bool
+	{
+		return is_numeric($name) && ((int) $name == (float) $name);
 	}
 
 }
