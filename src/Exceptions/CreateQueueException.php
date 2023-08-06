@@ -2,6 +2,8 @@
 
 namespace h4kuna\Queue\Exceptions;
 
-final class CreateQueueException extends \RuntimeException
+use RuntimeException;
+
+final class CreateQueueException extends RuntimeException
 {
 }

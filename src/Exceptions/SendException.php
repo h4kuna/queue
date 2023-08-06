@@ -2,6 +2,8 @@
 
 namespace h4kuna\Queue\Exceptions;
 
-final class SendException extends \RuntimeException
+use RuntimeException;
+
+final class SendException extends RuntimeException
 {
 }

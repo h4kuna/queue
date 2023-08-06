@@ -2,7 +2,9 @@
 
 namespace h4kuna\Queue\Exceptions;
 
-final class QueueInfoIsUnavailableException extends \Exception
+use Exception;
+
+final class QueueInfoIsUnavailableException extends Exception
 {
 
 }

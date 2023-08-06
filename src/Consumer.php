@@ -3,31 +3,13 @@
 namespace h4kuna\Queue;
 
 use h4kuna\Queue\Exceptions\ReceiveException;
+use h4kuna\Serialize\Serialize;
 
 final class Consumer
 {
 
-	public function __construct(private Queue $queue)
+	public function __construct(private Queue $queue, private Backup $backup)
 	{
-	}
-
-
-	public function tryReceive(int $messageType = Config::TYPE_DEFAULT): ?Message
-	{
-		try {
-			return $this->read($messageType, MSG_IPC_NOWAIT);
-		} catch (ReceiveException $e) {
-			if ($e->getCode() === MSG_ENOMSG) {
-				return null;
-			}
-			throw $e;
-		}
-	}
-
-
-	public function receive(int $messageType = Config::TYPE_DEFAULT): Message
-	{
-		return $this->read($messageType, 0);
 	}
 
 
@@ -50,7 +32,7 @@ final class Consumer
 			pcntl_signal_dispatch();
 		}
 
-		if (!$success || $error !== 0) {
+		if ($success === false || $error !== 0) {
 			if ($error === 43) {
 				throw new ReceiveException(sprintf('Another process remove queue "%s", error code "%s".',
 					$this->queue->name(), $error), $error);
@@ -60,7 +42,31 @@ final class Consumer
 				$this->queue->name(), $error), $error);
 		}
 
-		return new Message($message, $msgType);
+		$internalMessage = Serialize::decode($message);
+
+		assert($internalMessage instanceof InternalMessage);
+		$this->backup->remove($internalMessage);
+
+		return new Message($internalMessage->message, $msgType);
+	}
+
+
+	public function receive(int $messageType = Config::TYPE_DEFAULT): Message
+	{
+		return $this->read($messageType, 0);
+	}
+
+
+	public function tryReceive(int $messageType = Config::TYPE_DEFAULT): ?Message
+	{
+		try {
+			return $this->read($messageType, MSG_IPC_NOWAIT);
+		} catch (ReceiveException $e) {
+			if ($e->getCode() === MSG_ENOMSG) {
+				return null;
+			}
+			throw $e;
+		}
 	}
 
 }

@@ -4,6 +4,7 @@ namespace h4kuna\Queue;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Dir\TempDir;
+use h4kuna\Queue\Backup\Filesystem;
 use h4kuna\Queue\Exceptions\CreateQueueException;
 
 class QueueFactory
@@ -26,7 +27,8 @@ class QueueFactory
 		string $name,
 		?string $projectId = null,
 		int $permission = null,
-		int $messageSize = null
+		int $messageSize = null,
+		?Backup $backUp = null,
 	): Queue
 	{
 		if ($projectId === null) {
@@ -37,10 +39,20 @@ class QueueFactory
 		}
 
 		assert($this->tempDir !== null);
-		$filename = $this->tempDir->dir('queue')->filename($name);
+		$queueDir = $this->tempDir->dir('queue');
+		$filename = $queueDir->filename($name);
 		is_file($filename) || touch($filename);
+		if ($backUp === null) {
+			$backUp = new Filesystem($queueDir->dir("message/$name"));
+		}
 
-		return new Queue($filename, $projectId, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
+		$queue = new Queue($filename, $projectId, $backUp, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
+
+		if ($backUp->needRestore()) {
+			$backUp->restore($queue->producer());
+		}
+
+		return $queue;
 	}
 
 

@@ -9,7 +9,10 @@ use Tester\Assert;
 
 require_once __DIR__ . '/../TestCase.php';
 
-final class BasicTest extends TestCase
+/**
+ * @testCase
+ */
+final class QueueFactoryTest extends TestCase
 {
 
 	public function testReceive(): void
@@ -28,7 +31,7 @@ final class BasicTest extends TestCase
 	{
 		$queueFactory = new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'));
 
-		$queue = $queueFactory->create('my-queue');
+		$queue = $queueFactory->create('my-queue-receive');
 
 		Assert::null($queue->consumer()->tryReceive(0));
 		Assert::null($queue->consumer()->tryReceive(0));
@@ -41,4 +44,4 @@ final class BasicTest extends TestCase
 
 }
 
-(new BasicTest)->run();
+(new QueueFactoryTest)->run();
