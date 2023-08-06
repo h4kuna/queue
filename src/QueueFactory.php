@@ -6,14 +6,16 @@ use h4kuna\Dir\Dir;
 use h4kuna\Dir\TempDir;
 use h4kuna\Queue\Backup\Filesystem;
 use h4kuna\Queue\Exceptions\CreateQueueException;
+use h4kuna\Queue\SystemV\Msg;
+use h4kuna\Queue\SystemV\MsgInterface;
 
 class QueueFactory
 {
 
 	public function __construct(
-		private int $permission = 0666,
-		private ?Dir $tempDir = null,
-		private int $messageSize = Queue::MAX_MESSAGE_SIZE
+		protected /*readonly*/ int $permission = 0666,
+		protected /*readonly*/ ?Dir $tempDir = null,
+		protected /*readonly*/ int $messageSize = MsgInterface::MAX_MESSAGE_SIZE
 	)
 	{
 		$this->tempDir ??= new TempDir();
@@ -26,11 +28,35 @@ class QueueFactory
 	public function create(
 		string $name,
 		?string $projectId = null,
-		int $permission = null,
-		int $messageSize = null,
+		?int $permission = null,
+		?int $messageSize = null,
 		?Backup $backUp = null,
 	): Queue
 	{
+		assert($this->tempDir !== null);
+		$queueDir = $this->tempDir->dir('queue');
+
+		$msg = $this->createMsg($queueDir, $name, $projectId, $permission, $messageSize);
+
+		if ($backUp === null) {
+			$backUp = $this->createBackup($queueDir->dir("message/$name"));
+		}
+
+		return new Queue($backUp, $msg);
+	}
+
+
+	protected function createMsg(
+		Dir $queueDir,
+		string $name,
+		?string $projectId,
+		?int $permission,
+		?int $messageSize
+	): MsgInterface
+	{
+		$filename = $queueDir->filename($name);
+		is_file($filename) || touch($filename);
+
 		if ($projectId === null) {
 			if (preg_match('/(?<projectId>[a-z\d]{1})/i', $name, $match) === false) {
 				throw new CreateQueueException(sprintf('Can not use project id from name "%s". Please let fill in factory constructor.', $name));
@@ -38,33 +64,13 @@ class QueueFactory
 			$projectId = $match['projectId'];
 		}
 
-		assert($this->tempDir !== null);
-		$queueDir = $this->tempDir->dir('queue');
-		$filename = $queueDir->filename($name);
-		is_file($filename) || touch($filename);
-		if ($backUp === null) {
-			$backUp = new Filesystem($queueDir->dir("message/$name"));
-		}
-
-		$queue = new Queue($filename, $projectId, $backUp, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
-
-		if ($backUp->needRestore()) {
-			$backUp->restore($queue->producer());
-		}
-
-		return $queue;
+		return new Msg($filename, $projectId, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
 	}
 
 
-	protected function getPermission(): int
+	protected function createBackup(Dir $messageDir): Backup
 	{
-		return $this->permission;
-	}
-
-
-	protected function getMessageSize(): int
-	{
-		return $this->messageSize;
+		return new Filesystem($messageDir);
 	}
 
 }

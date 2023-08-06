@@ -8,6 +8,8 @@ final class InternalMessage
 {
 	private string $serialized = '';
 
+	private int $receiveMsgType = 0;
+
 
 	public function __construct(
 		public string $id,
@@ -16,6 +18,16 @@ final class InternalMessage
 		public bool $isBlocking,
 	)
 	{
+	}
+
+
+	public static function unserialize(string $content, int $receiveMessageType = 0): self
+	{
+		$internalMessage = Serialize::decode($content);
+		assert($internalMessage instanceof self);
+		$internalMessage->setReceiveMsgType($receiveMessageType);
+
+		return $internalMessage;
 	}
 
 
@@ -48,5 +60,17 @@ final class InternalMessage
 		$this->message = $data['message'];
 		$this->type = $data['type'];
 		$this->isBlocking = $data['isBlocking'];
+	}
+
+
+	public function createMessage(): Message
+	{
+		return new Message($this->message, $this->receiveMsgType);
+	}
+
+
+	private function setReceiveMsgType(int $msgType): void
+	{
+		$this->receiveMsgType = $msgType;
 	}
 }

@@ -32,7 +32,7 @@ final class Linux
 			}
 		}
 
-		return $output;
+		return str_pad($output, 9, '-', STR_PAD_LEFT);
 	}
 
 

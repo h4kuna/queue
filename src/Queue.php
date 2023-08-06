@@ -4,112 +4,39 @@ namespace h4kuna\Queue;
 
 use DateTimeImmutable;
 use h4kuna\Memoize\MemoryStorage;
-use SysvMessageQueue;
+use h4kuna\Queue\SystemV\MsgInterface;
 
 final class Queue
 {
 	use MemoryStorage;
 
-	public const MAX_MESSAGE_SIZE = 256; // bytes, max is by system, observed 8192
-	public const INFO_SETUP_UID = 'msg_perm.uid';
-	public const INFO_SETUP_GID = 'msg_perm.gid';
-	public const INFO_SETUP_MODE = 'msg_perm.mode';
-	public const INFO_CREATE_TIME = 'msg_ctime';
-	public const INFO_SEND_TIME = 'msg_stime';
-	public const INFO_RECEIVE_TIME = 'msg_rtime';
-	public const INFO_COUNT = 'msg_qnum';
-	public const INFO_SETUP_BYTES = 'msg_qbytes';
-	public const INFO_LAST_SEND_PID = 'msg_lspid';
-	public const INFO_LAST_RECEIVE_PID = 'msg_lrpid';
-
-
 	public function __construct(
-		private string $filename,
-		private string $projectId,
 		private Backup $backup,
-		private int $permission,
-		private int $maxMessageSize = self::MAX_MESSAGE_SIZE,
+		private MsgInterface $msg,
 	)
 	{
+		$this->restore();
 	}
 
 
 	public function remove(): bool
 	{
-		return msg_remove_queue($this->resource());
-	}
-
-
-	public function resource(): SysvMessageQueue
-	{
-		return $this->createResource();
-	}
-
-
-	private function createResource(): SysvMessageQueue
-	{
-		$key = $this->queueKey();
-		$exists = msg_queue_exists($key);
-		$queue = msg_get_queue($key, $this->permission);
-
-		if ($queue === false) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create.', $this->name()));
-		}
-
-		if ($exists && ($perm = $this->queuePermission($queue)) !== $this->permission) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s". %s',
-				$this->name(), $perm, $this->permission, $this->helpHowRemove($perm)));
-		}
-
-		return $queue;
-	}
-
-
-	private function queueKey(): int
-	{
-		$key = ftok($this->filename, $this->projectId);
-		if ($key === -1) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create. Probably file does not exists "%s" or project id "%s" is not valid.',
-				$this->name(), $this->filename, $this->projectId));
-		}
-
-		return $key;
+		return $this->msg->remove();
 	}
 
 
 	public function name(): string
 	{
-		return basename($this->filename);
-	}
-
-
-	private function queuePermission(SysvMessageQueue $queue): int
-	{
-		$stats = msg_stat_queue($queue);
-		if (!is_array($stats)) {
-			throw new Exceptions\CreateQueueException(sprintf('Bad initialize message queue. %s',
-				$this->helpHowRemove($this->permission)));
-		}
-
-		return $stats[self::INFO_SETUP_MODE];
-	}
-
-
-	private function helpHowRemove(int $permission): string
-	{
-		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->queueKey(), $permission);
+		return $this->msg->name();
 	}
 
 
 	/**
-	 * @param array<self::INFO_SETUP_*, int> $data
-	 * @return bool
+	 * @param array<MsgInterface::INFO_SETUP_*, int> $data
 	 */
 	public function setup(array $data): bool
 	{
-		$structure = [self::INFO_SETUP_UID, self::INFO_SETUP_GID, self::INFO_SETUP_MODE, self::INFO_SETUP_BYTES];
-
-		return msg_set_queue($this->resource(), array_intersect_key($data, array_fill_keys($structure, true)));
+		return $this->msg->setup($data);
 	}
 
 
@@ -117,41 +44,26 @@ final class Queue
 	 * @return array<string, mixed>
 	 * @throws Exceptions\QueueInfoIsUnavailableException
 	 */
-	public function information()
+	public function information(): array
 	{
-		$info = $this->info();
+		$info = $this->msg->info();
 		$extends = [
-			self::INFO_SETUP_MODE => Linux::permissionInToText($info[self::INFO_SETUP_MODE]),
-			self::INFO_CREATE_TIME => self::createDateTime($info[self::INFO_CREATE_TIME]),
-			self::INFO_SEND_TIME => self::createDateTime($info[self::INFO_SEND_TIME]),
-			self::INFO_RECEIVE_TIME => self::createDateTime($info[self::INFO_RECEIVE_TIME]),
-			self::INFO_SETUP_BYTES => $info[self::INFO_SETUP_BYTES],
-			self::INFO_COUNT => $info[self::INFO_COUNT],
-			self::INFO_LAST_RECEIVE_PID => $info[self::INFO_LAST_RECEIVE_PID],
-			self::INFO_LAST_SEND_PID => $info[self::INFO_LAST_SEND_PID],
+			MsgInterface::INFO_SETUP_MODE => Linux::permissionInToText($info[MsgInterface::INFO_SETUP_MODE]),
+			MsgInterface::INFO_CREATE_TIME => self::createDateTime($info[MsgInterface::INFO_CREATE_TIME]),
+			MsgInterface::INFO_SEND_TIME => self::createDateTime($info[MsgInterface::INFO_SEND_TIME]),
+			MsgInterface::INFO_RECEIVE_TIME => self::createDateTime($info[MsgInterface::INFO_RECEIVE_TIME]),
+			MsgInterface::INFO_SETUP_BYTES => $info[MsgInterface::INFO_SETUP_BYTES],
+			MsgInterface::INFO_COUNT => $info[MsgInterface::INFO_COUNT],
+			MsgInterface::INFO_LAST_RECEIVE_PID => $info[MsgInterface::INFO_LAST_RECEIVE_PID],
+			MsgInterface::INFO_LAST_SEND_PID => $info[MsgInterface::INFO_LAST_SEND_PID],
 		];
 
 		[
-			'user' => $extends[self::INFO_SETUP_UID],
-			'group' => $extends[self::INFO_SETUP_GID],
-		] = Linux::userGroupToText($info[self::INFO_SETUP_UID], $info[self::INFO_SETUP_GID]);
+			'user' => $extends[MsgInterface::INFO_SETUP_UID],
+			'group' => $extends[MsgInterface::INFO_SETUP_GID],
+		] = Linux::userGroupToText($info[MsgInterface::INFO_SETUP_UID], $info[MsgInterface::INFO_SETUP_GID]);
 
 		return $extends;
-	}
-
-
-	/**
-	 * @return array<self::INFO_*, int>
-	 * @throws Exceptions\QueueInfoIsUnavailableException
-	 */
-	public function info(): array
-	{
-		$info = msg_stat_queue($this->resource());
-		if ($info === false) {
-			throw new Exceptions\QueueInfoIsUnavailableException;
-		}
-
-		return $info;
 	}
 
 
@@ -162,12 +74,6 @@ final class Queue
 		}
 
 		return new DateTimeImmutable("@$timestamp");
-	}
-
-
-	public function messageSizeBytes(): int
-	{
-		return $this->maxMessageSize;
 	}
 
 
@@ -185,7 +91,7 @@ final class Queue
 	public function consumer(): Consumer
 	{
 		return $this->memoize(__METHOD__, function (): Consumer {
-			return new Consumer($this, $this->backup);
+			return new Consumer($this->backup, $this->msg);
 		});
 	}
 
@@ -193,8 +99,16 @@ final class Queue
 	public function producer(): Producer
 	{
 		return $this->memoize(__METHOD__, function (): Producer {
-			return new Producer($this, $this->backup);
+			return new Producer($this->backup, $this->msg);
 		});
+	}
+
+
+	private function restore(): void
+	{
+		if ($this->backup->needRestore()) {
+			$this->backup->restore($this->producer());
+		}
 	}
 
 }

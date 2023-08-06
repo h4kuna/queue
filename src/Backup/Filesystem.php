@@ -6,7 +6,6 @@ use h4kuna\Dir\Dir;
 use h4kuna\Queue\Backup;
 use h4kuna\Queue\InternalMessage;
 use h4kuna\Queue\Producer;
-use h4kuna\Serialize\Serialize;
 use Nette\Utils\Finder;
 use Nette\Utils\Random;
 use SplFileInfo;
@@ -63,9 +62,6 @@ final class Filesystem implements Backup
 		$content = file_get_contents($file->getPathname());
 		assert(is_string($content));
 
-		$internalMessage = Serialize::decode($content);
-		assert($internalMessage instanceof InternalMessage);
-
-		return $internalMessage;
+		return InternalMessage::unserialize($content);
 	}
 }
