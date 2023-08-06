@@ -1,10 +1,12 @@
 # Queue
 
-This use native php queue [msg_* functions](https://www.php.net/manual/en/function.msg-get-queue.php). Keep default parameters and does not support native serialize, message is only string.
+This use native php queue [msg_* functions](https://www.php.net/manual/en/function.msg-get-queue.php). Keep default
+parameters and does not support native serialize, message is only string.
 
 > The queue does not survive the server restart.
 
 ### Installation by composer
+
 `composer require h4kuna/queue`
 
 ### How to use
@@ -34,11 +36,15 @@ $queue->consumer()->receive(2)->message === 'Hello'
 ```
 
 Or read all types
+
 ```php
 $queue->producer()->send('Hello', 2);
 $queue->consumer()->receive(Queue\Config::TYPE_ALL)->message === 'Hello'
 ```
 
+> For backup queue you must install nette/utils for right work of class [Filesystem](src/Queue/Filesystem.php).
+
 Error codes for receive:
+
 - [base errors](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h)
 - [extends error](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h)

@@ -4,10 +4,11 @@ namespace h4kuna\Queue;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Dir\TempDir;
-use h4kuna\Queue\Backup\Filesystem;
 use h4kuna\Queue\Exceptions\CreateQueueException;
 use h4kuna\Queue\SystemV\Msg;
 use h4kuna\Queue\SystemV\MsgInterface;
+use Nette\Utils\Finder;
+use Nette\Utils\Random;
 
 class QueueFactory
 {
@@ -70,7 +71,10 @@ class QueueFactory
 
 	protected function createBackup(Dir $messageDir): Backup
 	{
-		return new Filesystem($messageDir);
-	}
+		if (class_exists(Finder::class) && class_exists(Random::class)) {
+			return new Backup\Filesystem($messageDir);
+		}
 
+		return new Backup\DevNull();
+	}
 }
