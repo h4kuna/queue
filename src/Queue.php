@@ -3,7 +3,6 @@
 namespace h4kuna\Queue;
 
 use h4kuna\Memoize\MemoryStorage;
-use h4kuna\Queue\Exceptions;
 use SysvMessageQueue;
 
 final class Queue
@@ -24,8 +23,8 @@ final class Queue
 
 
 	public function __construct(
-		private string $name,
-		private int $key,
+		private string $filename,
+		private string $projectId,
 		private int $permission,
 		private int $maxMessageSize = self::MAX_MESSAGE_SIZE,
 	)
@@ -35,17 +34,7 @@ final class Queue
 
 	public function name(): string
 	{
-		return $this->name;
-	}
-
-
-	public function fullname(): string
-	{
-		if (intval($this->name) === $this->key) {
-			return $this->name;
-		}
-
-		return "$this->name.$this->key";
+		return basename($this->filename);
 	}
 
 
@@ -151,18 +140,18 @@ final class Queue
 
 	private function createResource(): SysvMessageQueue
 	{
-		$exists = msg_queue_exists($this->key);
-		$queue = msg_get_queue($this->key, $this->permission);
+		$key = $this->queueKey();
+		$exists = msg_queue_exists($key);
+		$queue = msg_get_queue($key, $this->permission);
 
 		if ($queue === false) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create.', $this->fullname()));
+			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create.', $this->name()));
 		}
 
 		if ($exists && ($perm = $this->queuePermission($queue)) !== $this->permission) {
 			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s". %s',
-				$this->fullname(), $perm, $this->permission, $this->helpHowRemove($perm)));
+				$this->name(), $perm, $this->permission, $this->helpHowRemove($perm)));
 		}
-
 
 		return $queue;
 	}
@@ -190,9 +179,21 @@ final class Queue
 	}
 
 
+	private function queueKey(): int
+	{
+		$key = ftok($this->filename, $this->projectId);
+		if ($key === -1) {
+			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create. Probably file does not exists "%s" or project id "%s" is not valid.',
+				$this->name(), $this->filename, $this->projectId));
+		}
+
+		return $key;
+	}
+
+
 	private function helpHowRemove(int $permission): string
 	{
-		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->key, $permission);
+		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->queueKey(), $permission);
 	}
 
 }

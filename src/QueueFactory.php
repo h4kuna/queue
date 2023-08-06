@@ -2,33 +2,45 @@
 
 namespace h4kuna\Queue;
 
+use h4kuna\Dir\Dir;
+use h4kuna\Dir\TempDir;
+use h4kuna\Queue\Exceptions\CreateQueueException;
+
 class QueueFactory
 {
 
-	public function __construct(private int $permission = 0666, private int $messageSize = Queue::MAX_MESSAGE_SIZE)
+	public function __construct(
+		private int $permission = 0666,
+		private ?Dir $tempDir = null,
+		private int $messageSize = Queue::MAX_MESSAGE_SIZE
+	)
 	{
+		$this->tempDir ??= new TempDir();
 	}
 
 
 	/**
-	 * @param int|string $name - [name.id] is possible
+	 * @param string|null $projectId only one char
 	 */
-	public function create(int|string $name, int $permission = null): Queue
+	public function create(
+		string $name,
+		?string $projectId = null,
+		int $permission = null,
+		int $messageSize = null
+	): Queue
 	{
-		if ($permission === null) {
-			$permission = $this->permission;
+		if ($projectId === null) {
+			if (preg_match('/(?<projectId>[a-z\d]{1})/i', $name, $match) === false) {
+				throw new CreateQueueException(sprintf('Can not use project id from name "%s". Please let fill in factory constructor.', $name));
+			}
+			$projectId = $match['projectId'];
 		}
 
-		if (is_numeric($name)) {
-			$key = (int) $name;
-		} elseif (($explodeName = self::divideName($name)) !== null) {
-			$name = $explodeName['name'];
-			$key = $explodeName['key'];
-		} else {
-			$key = static::generateKey($name, $permission, $this->messageSize);
-		}
+		assert($this->tempDir !== null);
+		$filename = $this->tempDir->dir('queue')->filename($name);
+		is_file($filename) || touch($filename);
 
-		return new Queue((string) $name, $key, $permission, $this->messageSize);
+		return new Queue($filename, $projectId, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
 	}
 
 
@@ -41,32 +53,6 @@ class QueueFactory
 	protected function getMessageSize(): int
 	{
 		return $this->messageSize;
-	}
-
-
-	protected static function generateKey(string $name, int $permission, int $messageSize): int
-	{
-		return crc32("$name.$permission.$messageSize");
-	}
-
-
-	/**
-	 * @return array{name: string, key: int}|null
-	 */
-	protected static function divideName(string $name): ?array
-	{
-		$explodeName = explode('.', $name, 2);
-		if (isset($explodeName[1]) && self::isNumericInt($explodeName[1])) {
-			return ['name' => $explodeName[0], 'key' => (int) $explodeName[1]];
-		}
-
-		return null;
-	}
-
-
-	private static function isNumericInt(int|string $name): bool
-	{
-		return is_numeric($name) && ((int) $name == (float) $name);
 	}
 
 }

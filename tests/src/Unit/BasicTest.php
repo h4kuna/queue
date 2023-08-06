@@ -2,6 +2,7 @@
 
 namespace h4kuna\Queue\Tests\Unit;
 
+use h4kuna\Dir\Dir;
 use h4kuna\Queue;
 use h4kuna\Queue\Tests\TestCase;
 use Tester\Assert;
@@ -13,7 +14,7 @@ final class BasicTest extends TestCase
 
 	public function testReceive(): void
 	{
-		$queueFactory = new Queue\QueueFactory;
+		$queueFactory = new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'));
 
 		$queue = $queueFactory->create('my-queue');
 
@@ -25,7 +26,7 @@ final class BasicTest extends TestCase
 
 	public function testTryReceive(): void
 	{
-		$queueFactory = new Queue\QueueFactory;
+		$queueFactory = new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'));
 
 		$queue = $queueFactory->create('my-queue');
 

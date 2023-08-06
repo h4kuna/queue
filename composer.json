@@ -14,6 +14,7 @@
   "require": {
     "php": ">=8.0",
     "ext-sysvmsg": "*",
+    "h4kuna/dir": "^0.1.3",
     "h4kuna/memoize": "^0.1"
   },
   "require-dev": {

@@ -53,11 +53,11 @@ final class Consumer
 		if (!$success || $error !== 0) {
 			if ($error === 43) {
 				throw new ReceiveException(sprintf('Another process remove queue "%s", error code "%s".',
-					$this->queue->fullname(), $error), $error);
+					$this->queue->name(), $error), $error);
 			}
 
 			throw new ReceiveException(sprintf('Message received failed "%s", with code "%s".',
-				$this->queue->fullname(), $error), $error);
+				$this->queue->name(), $error), $error);
 		}
 
 		return new Message($message, $msgType);

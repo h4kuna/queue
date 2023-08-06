@@ -11,7 +11,7 @@ abstract class TestCase extends Tester\TestCase
 
 	public function run(): void
 	{
-		if (\defined('__PHPSTAN_RUNNING__')) {
+		if (defined('__PHPSTAN_RUNNING__')) {
 			return;
 		}
 
