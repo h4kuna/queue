@@ -15,7 +15,7 @@ final class InternalMessageTest extends TestCase
 {
 	public function testSerialize(): void
 	{
-		$internalMessage = new InternalMessage('id', 'message', 3, true);
+		$internalMessage = new InternalMessage('message', 3, true);
 		$internalMessage2 = InternalMessage::unserialize($internalMessage->serialized(), 1);
 
 		Assert::same($internalMessage->serialized(), $internalMessage2->serialized());

@@ -27,7 +27,6 @@ final class FilesystemTest extends TestCase
 		Assert::same('foo', $internalMessage->message);
 		Assert::same(3, $internalMessage->type);
 		Assert::true($internalMessage->isBlocking);
-		Assert::same(10, strlen($internalMessage->id));
 		Assert::notSame('', $internalMessage->serialized());
 
 		Assert::true($filesystem->needRestore());

@@ -8,14 +8,14 @@ use h4kuna\Queue\Producer;
 
 final class BackupMock implements Backup
 {
-	public function __construct(private string $id = '1', private bool $needRestore = false)
+	public function __construct(private bool $needRestore = false)
 	{
 	}
 
 
 	public function save(string $message, int $messageType, bool $blocking): InternalMessage
 	{
-		return new InternalMessage($this->id, $message, $messageType, $blocking);
+		return new InternalMessage($message, $messageType, $blocking);
 	}
 
 

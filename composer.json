@@ -22,7 +22,6 @@
     "phpstan/phpstan": "^1.9",
     "phpstan/phpstan-strict-rules": "^1.4",
     "nette/tester": "^2.3",
-    "nette/utils": "^4.0",
     "tracy/tracy": "^2.7"
   },
   "autoload": {
@@ -37,9 +36,6 @@
   },
   "config": {
     "sort-packages": true
-  },
-  "suggest": {
-    "nette/utils": "If you want to use Backup\\Filesystem."
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse",

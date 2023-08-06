@@ -6,18 +6,20 @@ use h4kuna\Serialize\Serialize;
 
 final class InternalMessage
 {
+	public string $id;
+
 	private string $serialized = '';
 
 	private int $receiveMsgType = 0;
 
 
 	public function __construct(
-		public string $id,
 		public string $message,
 		public int $type,
 		public bool $isBlocking,
 	)
 	{
+		$this->id = (string) microtime(true);
 	}
 
 

@@ -6,8 +6,6 @@ use h4kuna\Dir\Dir;
 use h4kuna\Queue\Backup;
 use h4kuna\Queue\InternalMessage;
 use h4kuna\Queue\Producer;
-use Nette\Utils\Finder;
-use Nette\Utils\Random;
 use SplFileInfo;
 
 final class Filesystem implements Backup
@@ -19,7 +17,7 @@ final class Filesystem implements Backup
 
 	public function save(string $message, int $messageType, bool $blocking): InternalMessage
 	{
-		$internalMessage = new InternalMessage(Random::generate(), $message, $messageType, $blocking);
+		$internalMessage = new InternalMessage($message, $messageType, $blocking);
 		$path = $this->dir->filename($internalMessage->id);
 		file_put_contents($path, $internalMessage->serialized());
 
@@ -49,10 +47,22 @@ final class Filesystem implements Backup
 
 	public function restore(Producer $producer): void
 	{
-		$files = Finder::findFiles('*')->in($this->dir->getDir());
+		$files = scandir($this->dir->getDir());
+		if ($files === false) {
+			return;
+		}
 
 		foreach ($files as $file) {
-			$producer->send($this->restoreMessage($file));
+			if ($file === '.' || $file === '..') {
+				continue;
+			}
+			$producer->send(
+				$this->restoreMessage(
+					new SplFileInfo(
+						$this->dir->filename($file)
+					)
+				)
+			);
 		}
 	}
 
