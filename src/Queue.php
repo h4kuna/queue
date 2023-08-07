@@ -104,7 +104,7 @@ final class Queue
 	}
 
 
-	private function restore(): void
+	public function restore(): void
 	{
 		if ($this->backup->needRestore()) {
 			$this->backup->restore($this->producer());
