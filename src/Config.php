@@ -8,4 +8,6 @@ interface Config
 	public const TYPE_DEFAULT = 1;
 
 	public const NO_SERIALIZE = false; // intentionally this value is no change
+
+	public const QUEUE_ERROR = 43;
 }

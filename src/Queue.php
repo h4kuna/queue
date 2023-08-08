@@ -15,13 +15,6 @@ final class Queue
 		private MsgInterface $msg,
 	)
 	{
-		$this->restore();
-	}
-
-
-	public function remove(): bool
-	{
-		return $this->msg->remove();
 	}
 
 
@@ -77,17 +70,6 @@ final class Queue
 	}
 
 
-	/**
-	 * If you want prepare queue with master process, let's try to use remove()
-	 */
-	public function flush(int $type = Config::TYPE_ALL): void
-	{
-		$consumer = $this->consumer();
-		while ($consumer->tryReceive($type) !== null) {
-		}
-	}
-
-
 	public function consumer(): Consumer
 	{
 		return $this->memoize(__METHOD__, function (): Consumer {
@@ -104,9 +86,11 @@ final class Queue
 	}
 
 
-	public function restore(): void
+	public function restore(bool $remove = true): void
 	{
+		$remove && $this->msg->remove();
 		if ($this->backup->needRestore()) {
+			$this->msg->remove();
 			$this->backup->restore($this->producer());
 		}
 	}

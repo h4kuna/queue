@@ -2,7 +2,6 @@
 
 namespace h4kuna\Queue\SystemV;
 
-use h4kuna\Memoize\MemoryStorage;
 use h4kuna\Queue\Config;
 use h4kuna\Queue\Exceptions;
 use h4kuna\Queue\InternalMessage;
@@ -10,7 +9,8 @@ use SysvMessageQueue;
 
 final class Msg implements MsgInterface
 {
-	use MemoryStorage;
+	private ?SysvMessageQueue $resource = null;
+
 
 	public function __construct(
 		private string $filename,
@@ -47,7 +47,7 @@ final class Msg implements MsgInterface
 	}
 
 
-	public function receive(int $messageType, int $flags): InternalMessage
+	public function receive(int $messageType, int $flags): ?InternalMessage
 	{
 		$msgType = $error = 0;
 		$success = msg_receive(
@@ -69,10 +69,12 @@ final class Msg implements MsgInterface
 
 		switch ($error) {
 			case 0:
-				return InternalMessage::unserialize($message, $msgType);// ok
-			case 43:
+				return InternalMessage::unserialize($message, $msgType); // ok
+			case Config::QUEUE_ERROR:
 				throw new Exceptions\ReceiveException(sprintf('Another process remove queue "%s", error code "%s".',
 					$this->name(), $error), $error);
+			case MSG_ENOMSG:
+				return null;
 			default:
 				throw new Exceptions\ReceiveException(sprintf('Message received failed "%s", with code "%s".',
 					$this->name(), $error), $error);
@@ -106,7 +108,13 @@ final class Msg implements MsgInterface
 
 	public function remove(): bool
 	{
-		return msg_remove_queue($this->resource());
+		if ($this->exists() === false) {
+			return false;
+		}
+		$result = msg_remove_queue($this->resource());
+		$this->clearResource();
+
+		return $result;
 	}
 
 
@@ -116,25 +124,31 @@ final class Msg implements MsgInterface
 	}
 
 
+	private function exists(): bool
+	{
+		return msg_queue_exists($this->queueKey());
+	}
+
+
 	private function resource(): SysvMessageQueue
 	{
-		return $this->memoize('resource', function (): SysvMessageQueue {
-			return $this->createResource();
-		});
+		if ($this->resource === null) {
+			$this->resource = $this->createResource();
+		};
+
+		return $this->resource;
 	}
 
 
 	private function createResource(): SysvMessageQueue
 	{
-		$key = $this->queueKey();
-		$exists = msg_queue_exists($key);
-		$queue = msg_get_queue($key, $this->permission);
+		$queue = msg_get_queue($this->queueKey(), $this->permission);
 
 		if ($queue === false) {
 			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create.', $this->name()));
 		}
 
-		if ($exists && ($perm = $this->queuePermission($queue)) !== $this->permission) {
+		if ($this->exists() && ($perm = $this->queuePermission($queue)) !== $this->permission) {
 			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" already exists with permissions "%s" and you require "%s". %s',
 				$this->name(), $perm, $this->permission, $this->helpHowRemove($perm)));
 		}
@@ -178,5 +192,11 @@ final class Msg implements MsgInterface
 	private function helpHowRemove(int $permission): string
 	{
 		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->queueKey(), $permission);
+	}
+
+
+	private function clearResource(): void
+	{
+		$this->resource = null;
 	}
 }

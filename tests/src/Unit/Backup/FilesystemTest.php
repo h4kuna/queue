@@ -4,6 +4,7 @@ namespace h4kuna\Queue\Tests\Unit\Backup;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\Backup\Filesystem;
+use h4kuna\Queue\Consumer;
 use h4kuna\Queue\InternalMessage;
 use h4kuna\Queue\Producer;
 use h4kuna\Queue\Tests\Fixtures\BackupMock;
@@ -31,7 +32,10 @@ final class FilesystemTest extends TestCase
 
 		Assert::true($filesystem->needRestore());
 		$msg = new MsgMock();
-		$filesystem->restore(new Producer(new BackupMock(), $msg));
+		$backup = new BackupMock();
+		$filesystem->restore(new Producer($backup, $msg));
+		assert($msg->internalMessage !== null);
+
 		Assert::same($internalMessage->message, $msg->internalMessage->message);
 		Assert::same($internalMessage->id, $msg->internalMessage->id);
 		Assert::same($internalMessage->type, $msg->internalMessage->type);

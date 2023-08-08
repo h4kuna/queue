@@ -3,6 +3,7 @@
 namespace h4kuna\Queue\Backup;
 
 use h4kuna\Queue\Backup;
+use h4kuna\Queue\Consumer;
 use h4kuna\Queue\InternalMessage;
 use h4kuna\Queue\Producer;
 
@@ -10,7 +11,7 @@ final class DevNull implements Backup
 {
 	public function save(string $message, int $messageType, bool $blocking): InternalMessage
 	{
-		return new InternalMessage('', $message, $messageType, $blocking);
+		return new InternalMessage($message, $messageType, $blocking);
 	}
 
 

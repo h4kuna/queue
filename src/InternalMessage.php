@@ -19,7 +19,15 @@ final class InternalMessage
 		public bool $isBlocking,
 	)
 	{
-		$this->id = (string) microtime(true);
+		$this->id = self::random();
+	}
+
+
+	private static function random(): string
+	{
+		$right = bin2hex(random_bytes(2));
+		$left = number_format(microtime(true), 4, '.', '');
+		return "$left-$right";
 	}
 
 

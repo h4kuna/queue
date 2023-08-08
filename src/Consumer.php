@@ -2,7 +2,6 @@
 
 namespace h4kuna\Queue;
 
-use h4kuna\Queue\Exceptions\ReceiveException;
 use h4kuna\Queue\SystemV\MsgInterface;
 
 final class Consumer
@@ -13,30 +12,48 @@ final class Consumer
 	}
 
 
-	private function read(int $messageType, int $flags): Message
+	/**
+	 * @return ($flags is 0 ? Message: Message|null)
+	 * @throws Exceptions\ReceiveException
+	 */
+	private function read(int $messageType, int $flags): ?Message
 	{
 		$internalMessage = $this->msg->receive($messageType, $flags);
+
+		if ($internalMessage === null) {
+			return null;
+		}
+
 		$this->backup->remove($internalMessage);
 
 		return $internalMessage->createMessage();
 	}
 
 
+	/**
+	 * @throws Exceptions\ReceiveException
+	 */
 	public function receive(int $messageType = Config::TYPE_DEFAULT): Message
 	{
 		return $this->read($messageType, 0);
 	}
 
 
+	/**
+	 * @throws Exceptions\ReceiveException
+	 */
 	public function tryReceive(int $messageType = Config::TYPE_DEFAULT): ?Message
 	{
-		try {
-			return $this->read($messageType, MSG_IPC_NOWAIT);
-		} catch (ReceiveException $e) {
-			if ($e->getCode() === MSG_ENOMSG) {
-				return null;
-			}
-			throw $e;
+		return $this->read($messageType, MSG_IPC_NOWAIT);
+	}
+
+
+	/**
+	 * If you want to prepare queue with master process, let's try to use remove()
+	 */
+	public function flush(int $type = Config::TYPE_ALL): void
+	{
+		while ($this->msg->receive($type, MSG_IPC_NOWAIT) !== null) {
 		}
 	}
 

@@ -52,6 +52,8 @@ final class Filesystem implements Backup
 			return;
 		}
 
+		sort($files, SORT_NUMERIC);
+
 		foreach ($files as $file) {
 			if ($file === '.' || $file === '..') {
 				continue;

@@ -2,8 +2,6 @@
 
 namespace h4kuna\Queue\Exceptions;
 
-use RuntimeException;
-
-final class ReceiveException extends RuntimeException
+final class ReceiveException extends \Exception
 {
 }

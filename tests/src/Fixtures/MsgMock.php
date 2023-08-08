@@ -16,9 +16,8 @@ final class MsgMock implements MsgInterface
 	}
 
 
-	public function receive(int $messageType, int $flags): InternalMessage
+	public function receive(int $messageType, int $flags): ?InternalMessage
 	{
-		assert($this->internalMessage !== null);
 		return $this->internalMessage;
 	}
 

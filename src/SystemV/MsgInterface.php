@@ -24,7 +24,11 @@ interface MsgInterface
 	public function send(InternalMessage $internalMessage): void;
 
 
-	public function receive(int $messageType, int $flags): InternalMessage;
+	/**
+	 * @return ($flags is 0 ? InternalMessage : InternalMessage|null)
+	 * @throws Exceptions\ReceiveException
+	 */
+	public function receive(int $messageType, int $flags): ?InternalMessage;
 
 
 	/**
@@ -44,4 +48,5 @@ interface MsgInterface
 
 
 	public function remove(): bool;
+
 }
