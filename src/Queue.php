@@ -60,6 +60,15 @@ final class Queue
 	}
 
 
+	/**
+	 * @throws Exceptions\QueueInfoIsUnavailableException
+	 */
+	public function count(): int
+	{
+		return $this->msg->info()[MsgInterface::INFO_COUNT];
+	}
+
+
 	private static function createDateTime(int $timestamp): ?DateTimeImmutable
 	{
 		if ($timestamp === 0) {
