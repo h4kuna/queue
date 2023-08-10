@@ -42,6 +42,35 @@ $queue->producer()->send('Hello', 2);
 $queue->consumer()->receive(Queue\Config::TYPE_ALL)->message === 'Hello'
 ```
 
+## Limitations
+- queue size is 120
+- the consumer can be only one, if queue failed
+
+## Catch receive error
+
+```php
+use h4kuna\Queue;
+
+/** @var Queue\QueueFactory $queue */
+$queueFactory = new Queue\QueueFactory();
+
+/** @var Queue\Queue $queue */
+$queue = $queueFactory->create('my-queue');
+
+tryAgain:
+$queue->restore();
+try {
+    $message = $queue->consumer()->receive();
+    // ... 
+} catch (Queue\ReceiveException $e) {
+    // log error
+    sleep(1); // wait and try again, for less CPU usage and log spam
+    goto tryAgain;
+}
+
+
+```
+
 Error codes for receive:
 
 - [base errors](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h)
