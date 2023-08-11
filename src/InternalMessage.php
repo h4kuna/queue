@@ -53,23 +53,23 @@ final class InternalMessage
 	public function __serialize(): array
 	{
 		return [
-			'id' => $this->id,
-			'message' => $this->message,
-			'type' => $this->type,
-			'isBlocking' => $this->isBlocking,
+			0 => $this->id,
+			1 => $this->message,
+			2 => $this->type,
+			3 => $this->isBlocking,
 		];
 	}
 
 
 	/**
-	 * @param array{id: string, message: string, type: int, isBlocking: bool} $data
+	 * @param array{0: string, 1: string, 2: int, 3: bool} $data
 	 */
 	public function __unserialize(array $data): void
 	{
-		$this->id = $data['id'];
-		$this->message = $data['message'];
-		$this->type = $data['type'];
-		$this->isBlocking = $data['isBlocking'];
+		$this->id = $data[0];
+		$this->message = $data[1];
+		$this->type = $data[2];
+		$this->isBlocking = $data[3];
 	}
 
 

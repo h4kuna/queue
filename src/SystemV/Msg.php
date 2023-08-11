@@ -41,7 +41,7 @@ final class Msg implements MsgInterface
 
 				throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s".', $this->name(), $bytesSize));
 			case 22:
-				throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->name(), $this->maxMessageSize, strlen($internalMessage->message)));
+				throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->name(), $this->maxMessageSize, strlen($internalMessage->serialized())));
 		}
 		throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" with code "%s".', $this->name(), $error), $error);
 	}
