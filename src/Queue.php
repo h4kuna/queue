@@ -100,7 +100,7 @@ final class Queue
 		$remove && $this->msg->remove();
 		if ($this->backup->needRestore()) {
 			$this->msg->remove();
-			$this->backup->restore($this->producer());
+			$this->backup->restore($this->msg);
 		}
 	}
 

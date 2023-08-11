@@ -5,7 +5,7 @@ namespace h4kuna\Queue\Backup;
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\Backup;
 use h4kuna\Queue\InternalMessage;
-use h4kuna\Queue\Producer;
+use h4kuna\Queue\SystemV\MsgInterface;
 use SplFileInfo;
 
 final class Filesystem implements Backup
@@ -45,35 +45,22 @@ final class Filesystem implements Backup
 	}
 
 
-	public function restore(Producer $producer): void
+	public function restore(MsgInterface $msg): void
 	{
-		$files = scandir($this->dir->getDir());
+		$files = scandir($this->dir->getDir(), SCANDIR_SORT_ASCENDING);
 		if ($files === false) {
 			return;
 		}
-
-		sort($files, SORT_NUMERIC);
 
 		foreach ($files as $file) {
 			if ($file === '.' || $file === '..') {
 				continue;
 			}
-			$producer->send(
-				$this->restoreMessage(
-					new SplFileInfo(
-						$this->dir->filename($file)
-					)
-				)
-			);
+			$content = file_get_contents($this->dir->filename($file));
+			assert(is_string($content));
+
+			$msg->send(InternalMessage::unserialize($content));
 		}
 	}
 
-
-	private function restoreMessage(SplFileInfo $file): InternalMessage
-	{
-		$content = file_get_contents($file->getPathname());
-		assert(is_string($content));
-
-		return InternalMessage::unserialize($content);
-	}
 }

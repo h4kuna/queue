@@ -4,7 +4,7 @@ namespace h4kuna\Queue\Tests\Fixtures;
 
 use h4kuna\Queue\Backup;
 use h4kuna\Queue\InternalMessage;
-use h4kuna\Queue\Producer;
+use h4kuna\Queue\SystemV\MsgInterface;
 
 final class BackupMock implements Backup
 {
@@ -25,7 +25,7 @@ final class BackupMock implements Backup
 	}
 
 
-	public function restore(Producer $producer): void
+	public function restore(MsgInterface $msg): void
 	{
 	}
 

@@ -15,31 +15,27 @@ final class Producer
 	}
 
 
-	public function send(string|InternalMessage $message, int $messageType = Config::TYPE_DEFAULT): void
+	public function send(string $message, int $messageType = Config::TYPE_DEFAULT): void
 	{
 		$this->save($message, $messageType, self::BLOCKING);
 	}
 
 
-	public function sendNonBlocking(string|InternalMessage $message, int $messageType = Config::TYPE_DEFAULT): void
+	public function sendNonBlocking(string $message, int $messageType = Config::TYPE_DEFAULT): void
 	{
 		$this->save($message, $messageType, self::NO_BLOCKING);
 	}
 
 
-	private function save(string|InternalMessage $message, int $messageType, bool $blocking): void
+	private function save(string $message, int $messageType, bool $blocking): void
 	{
 		if ($messageType <= 0) {
 			throw new Exceptions\SendException('Message type MUST be greater than 0.');
 		}
 
-		if (is_string($message)) {
-			$internalMessage = $this->backup->save($message, $messageType, $blocking);
-		} else {
-			$internalMessage = $message;
-		}
-
-		$this->msg->send($internalMessage);
+		$this->msg->send(
+			$this->backup->save($message, $messageType, $blocking)
+		);
 	}
 
 }

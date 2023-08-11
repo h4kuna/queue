@@ -32,8 +32,7 @@ final class FilesystemTest extends TestCase
 
 		Assert::true($filesystem->needRestore());
 		$msg = new MsgMock();
-		$backup = new BackupMock();
-		$filesystem->restore(new Producer($backup, $msg));
+		$filesystem->restore($msg);
 		assert($msg->internalMessage !== null);
 
 		Assert::same($internalMessage->message, $msg->internalMessage->message);

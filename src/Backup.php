@@ -2,6 +2,8 @@
 
 namespace h4kuna\Queue;
 
+use h4kuna\Queue\SystemV\MsgInterface;
+
 interface Backup
 {
 	public function save(string $message, int $messageType, bool $blocking): InternalMessage;
@@ -10,7 +12,7 @@ interface Backup
 	public function needRestore(): bool;
 
 
-	public function restore(Producer $producer): void;
+	public function restore(MsgInterface $msg): void;
 
 
 	public function remove(InternalMessage $internalMessage): void;
