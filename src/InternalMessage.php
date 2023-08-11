@@ -18,6 +18,10 @@ class InternalMessage
 		public string $id = ''
 	)
 	{
+		if ($this->type <= 0) {
+			throw new Exceptions\InvalidStateException('Message type MUST be greater than 0.');
+		}
+
 		if ($this->id === '') {
 			$this->id = self::random();
 		}

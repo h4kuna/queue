@@ -6,7 +6,6 @@ use h4kuna\Dir\Dir;
 use h4kuna\Queue\Backup;
 use h4kuna\Queue\InternalMessage;
 use h4kuna\Queue\SystemV\MsgInterface;
-use SplFileInfo;
 
 final class Filesystem implements Backup
 {

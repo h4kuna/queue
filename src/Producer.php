@@ -29,10 +29,6 @@ final class Producer
 
 	private function save(string $message, int $messageType, bool $blocking): void
 	{
-		if ($messageType <= 0) {
-			throw new Exceptions\SendException('Message type MUST be greater than 0.');
-		}
-
 		$this->msg->send(
 			$this->backup->save($message, $messageType, $blocking)
 		);

@@ -21,7 +21,7 @@ final class InternalMessageTest extends TestCase
 	{
 		return [
 			[new InternalMessage('Lorem ipsum dolor sit amet, consectetuer adipiscing elit. In dapibus augue non sapien. Duis sapien nunc, commodo et, interdum suscipit, sollicitudin et, dolor. Fusce suscipit libero eget elit.', 3, true)],
-			[new InternalMessage('Hello, ""\\how are \, \\,you"?', 0, false)],
+			[new InternalMessage('Hello, ""\\how are \, \\,you"?', 1, false)],
 		];
 	}
 

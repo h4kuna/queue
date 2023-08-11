@@ -33,7 +33,7 @@ final class ProducerAndConsumerTest extends TestCase
 
 
 	/**
-	 * @throws h4kuna\Queue\Exceptions\SendException
+	 * @throws h4kuna\Queue\Exceptions\InvalidStateException
 	 */
 	public function testMessageTypeIsNegative(): void
 	{

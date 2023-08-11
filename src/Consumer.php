@@ -13,24 +13,6 @@ final class Consumer
 
 
 	/**
-	 * @return ($flags is 0 ? Message: Message|null)
-	 * @throws Exceptions\ReceiveException
-	 */
-	private function read(int $messageType, int $flags): ?Message
-	{
-		$internalMessage = $this->msg->receive($messageType, $flags);
-
-		if ($internalMessage === null) {
-			return null;
-		}
-
-		$this->backup->remove($internalMessage);
-
-		return $internalMessage->createMessage();
-	}
-
-
-	/**
 	 * @throws Exceptions\ReceiveException
 	 */
 	public function receive(int $messageType = Config::TYPE_DEFAULT): Message
@@ -49,12 +31,20 @@ final class Consumer
 
 
 	/**
-	 * If you want to prepare queue with master process, let's try to use remove()
+	 * @return ($flags is 0 ? Message: Message|null)
+	 * @throws Exceptions\ReceiveException
 	 */
-	public function flush(int $type = Config::TYPE_ALL): void
+	private function read(int $messageType, int $flags): ?Message
 	{
-		while ($this->msg->receive($type, MSG_IPC_NOWAIT) !== null) {
+		$internalMessage = $this->msg->receive($messageType, $flags);
+
+		if ($internalMessage === null) {
+			return null;
 		}
+
+		$this->backup->remove($internalMessage);
+
+		return $internalMessage->createMessage();
 	}
 
 }
