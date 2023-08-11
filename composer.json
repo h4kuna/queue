@@ -19,9 +19,10 @@
     "mll-lab/str_putcsv": "^1.1"
   },
   "require-dev": {
+    "h4kuna/serialize-polyfill": "^0.2.2",
+    "nette/tester": "^2.3",
     "phpstan/phpstan": "^1.9",
     "phpstan/phpstan-strict-rules": "^1.4",
-    "nette/tester": "^2.3",
     "tracy/tracy": "^2.7"
   },
   "autoload": {
@@ -33,6 +34,9 @@
     "psr-4": {
       "h4kuna\\Queue\\Tests\\": "tests/src"
     }
+  },
+  "suggest": {
+    "ext-lib": "For compress messages, lobger then 150 chars."
   },
   "config": {
     "sort-packages": true

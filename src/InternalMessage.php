@@ -2,11 +2,13 @@
 
 namespace h4kuna\Queue;
 
-final class InternalMessage
+class InternalMessage
 {
 	private string $serialized = '';
 
 	private int $receiveMsgType = 0;
+
+	private bool $compress = false;
 
 
 	public function __construct(
@@ -50,11 +52,19 @@ final class InternalMessage
 
 	private function serializeCsv(): string
 	{
+		if (strlen($this->message) < 150 || extension_loaded('zlib') === false) {
+			$message = $this->message;
+		} else {
+			$message = gzcompress($this->message);
+			$this->compress = true;
+		}
+
 		return str_putcsv([
 			$this->id,
-			$this->message,
+			$message,
 			$this->type,
 			$this->isBlocking,
+			$this->compress,
 		]);
 	}
 
@@ -62,7 +72,12 @@ final class InternalMessage
 	private static function unserializeCsv(string $content): self
 	{
 		$data = str_getcsv($content);
-		assert(isset($data[0], $data[1], $data[2], $data[3]));
+		assert(isset($data[0], $data[1], $data[2], $data[3], $data[4]));
+		if (boolval($data[4])) {
+			$data[1] = gzuncompress($data[1]);
+			assert($data[1] !== false);
+		}
+
 		return new self($data[1], (int) $data[2], (bool) $data[3], $data[0]);
 	}
 

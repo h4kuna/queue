@@ -20,7 +20,7 @@ final class InternalMessageTest extends TestCase
 	protected function dataSerialize(): array
 	{
 		return [
-			[new InternalMessage('Hello, "how are you"?', 3, true)],
+			[new InternalMessage('Lorem ipsum dolor sit amet, consectetuer adipiscing elit. In dapibus augue non sapien. Duis sapien nunc, commodo et, interdum suscipit, sollicitudin et, dolor. Fusce suscipit libero eget elit.', 3, true)],
 			[new InternalMessage('Hello, ""\\how are \, \\,you"?', 0, false)],
 		];
 	}
@@ -29,7 +29,7 @@ final class InternalMessageTest extends TestCase
 	/**
 	 * @dataProvider dataSerialize
 	 */
-	public function testSerialize($internalMessage): void
+	public function testSerialize(InternalMessage $internalMessage): void
 	{
 		$internalMessage2 = InternalMessage::unserialize($internalMessage->serialized(), 1);
 
