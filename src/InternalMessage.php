@@ -2,12 +2,8 @@
 
 namespace h4kuna\Queue;
 
-use h4kuna\Serialize\Serialize;
-
 final class InternalMessage
 {
-	public string $id;
-
 	private string $serialized = '';
 
 	private int $receiveMsgType = 0;
@@ -17,9 +13,12 @@ final class InternalMessage
 		public string $message,
 		public int $type,
 		public bool $isBlocking,
+		public string $id = ''
 	)
 	{
-		$this->id = self::random();
+		if ($this->id === '') {
+			$this->id = self::random();
+		}
 	}
 
 
@@ -33,8 +32,7 @@ final class InternalMessage
 
 	public static function unserialize(string $content, int $receiveMessageType = 0): self
 	{
-		$internalMessage = Serialize::decode($content);
-		assert($internalMessage instanceof self);
+		$internalMessage = self::unserializeCsv($content);
 		$internalMessage->setReceiveMsgType($receiveMessageType);
 
 		return $internalMessage;
@@ -44,32 +42,28 @@ final class InternalMessage
 	public function serialized(): string
 	{
 		if ($this->serialized === '') {
-			$this->serialized = Serialize::encode($this);
+			$this->serialized = $this->serializeCsv();
 		}
 		return $this->serialized;
 	}
 
 
-	public function __serialize(): array
+	private function serializeCsv(): string
 	{
-		return [
-			0 => $this->id,
-			1 => $this->message,
-			2 => $this->type,
-			3 => $this->isBlocking,
-		];
+		return str_putcsv([
+			$this->id,
+			$this->message,
+			$this->type,
+			$this->isBlocking,
+		]);
 	}
 
 
-	/**
-	 * @param array{0: string, 1: string, 2: int, 3: bool} $data
-	 */
-	public function __unserialize(array $data): void
+	private static function unserializeCsv(string $content): self
 	{
-		$this->id = $data[0];
-		$this->message = $data[1];
-		$this->type = $data[2];
-		$this->isBlocking = $data[3];
+		$data = str_getcsv($content);
+		assert(isset($data[0], $data[1], $data[2], $data[3]));
+		return new self($data[1], (int) $data[2], (bool) $data[3], $data[0]);
 	}
 
 

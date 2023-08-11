@@ -13,9 +13,24 @@ require __DIR__ . '/../../bootstrap.php';
  */
 final class InternalMessageTest extends TestCase
 {
-	public function testSerialize(): void
+
+	/**
+	 * @return array<array<InternalMessage>>
+	 */
+	protected function dataSerialize(): array
 	{
-		$internalMessage = new InternalMessage('message', 3, true);
+		return [
+			[new InternalMessage('Hello, "how are you"?', 3, true)],
+			[new InternalMessage('Hello, ""\\how are \, \\,you"?', 0, false)],
+		];
+	}
+
+
+	/**
+	 * @dataProvider dataSerialize
+	 */
+	public function testSerialize($internalMessage): void
+	{
 		$internalMessage2 = InternalMessage::unserialize($internalMessage->serialized(), 1);
 
 		Assert::same($internalMessage->serialized(), $internalMessage2->serialized());

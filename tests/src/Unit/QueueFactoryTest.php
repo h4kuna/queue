@@ -21,9 +21,9 @@ final class QueueFactoryTest extends TestCase
 
 		$queue = $queueFactory->create('my-queue');
 
-		$queue->producer()->send('Hello');
+		$queue->producer()->send('Hello, "how are you"?');
 
-		Assert::same('Hello', $queue->consumer()->receive()->message);
+		Assert::same('Hello, "how are you"?', $queue->consumer()->receive()->message);
 	}
 
 
