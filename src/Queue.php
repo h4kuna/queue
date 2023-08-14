@@ -18,18 +18,9 @@ final class Queue
 	}
 
 
-	public function name(): string
+	public function msg(): MsgInterface
 	{
-		return $this->msg->name();
-	}
-
-
-	/**
-	 * @param array<MsgInterface::INFO_SETUP_*, int> $data
-	 */
-	public function setup(array $data): bool
-	{
-		return $this->msg->setup($data);
+		return $this->msg;
 	}
 
 

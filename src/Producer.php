@@ -21,9 +21,17 @@ final class Producer
 	}
 
 
-	public function sendNonBlocking(string $message, int $messageType = Config::TYPE_DEFAULT): void
+	public function sendNonBlocking(string $message, int $messageType = Config::TYPE_DEFAULT): bool
 	{
-		$this->save($message, $messageType, self::NO_BLOCKING);
+		try {
+			$this->save($message, $messageType, self::NO_BLOCKING);
+		} catch (Exceptions\SendException $e) {
+			if ($e->getCode() === Config::QUEUE_IS_FULL) {
+				return false;
+			}
+			throw $e;
+		}
+		return true;
 	}
 
 

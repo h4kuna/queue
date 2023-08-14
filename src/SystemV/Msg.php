@@ -19,11 +19,17 @@ final class Msg implements MsgInterface
 		private int $maxMessageSize = self::MAX_MESSAGE_SIZE,
 	)
 	{
+		if ($this->maxMessageSize <= Config::MINIMAL_QUEUE_SIZE) {
+			throw new Exceptions\CreateQueueException(sprintf('Minimal queue size must be "%s" and you want "%s".', Config::MINIMAL_QUEUE_SIZE + 1, $this->maxMessageSize));
+		}
 	}
 
 
 	public function send(InternalMessage $internalMessage): void
 	{
+		if (strlen($internalMessage->serialized()) > $this->maxMessageSize) {
+			throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->name(), $this->maxMessageSize, strlen($internalMessage->serialized())));
+		}
 		$error = 0;
 		$success = @msg_send($this->resource(), $internalMessage->type, $internalMessage->serialized(), Config::NO_SERIALIZE, $internalMessage->isBlocking, $error);
 
@@ -32,16 +38,16 @@ final class Msg implements MsgInterface
 		switch ($error) {
 			case 0:
 				return; // ok
-			case 11:
+			case Config::QUEUE_IS_FULL:
 				try {
 					$bytesSize = $this->info()[self::INFO_SETUP_BYTES];
 				} catch (Exceptions\QueueInfoIsUnavailableException) {
 					$bytesSize = 'unavailable';
 				}
 
-				throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s".', $this->name(), $bytesSize));
+				throw new Exceptions\SendException(sprintf('Queue "%s" is full, allowed size is "%s".', $this->name(), $bytesSize), $error);
 			case 22:
-				throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->name(), $this->maxMessageSize, strlen($internalMessage->serialized())));
+				throw new Exceptions\SendException(sprintf('Message is too long for queue "%s", allowed size is "%s" and you have "%s".', $this->name(), $this->maxMessageSize, strlen($internalMessage->serialized())), $error);
 		}
 		throw new Exceptions\SendException(sprintf('Message is not saved to queue "%s" with code "%s".', $this->name(), $error), $error);
 	}

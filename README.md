@@ -71,6 +71,11 @@ try {
 
 ```
 
+### List of queues
+```bash
+ipcs -q
+```
+
 Error codes for receive:
 
 - [base errors](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h)

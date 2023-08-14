@@ -2,6 +2,7 @@
 
 namespace h4kuna\Queue\Tests\Unit;
 
+use h4kuna\Queue\Config;
 use h4kuna\Queue\InternalMessage;
 use Tester\Assert;
 use Tester\TestCase;
@@ -35,6 +36,12 @@ final class InternalMessageTest extends TestCase
 
 		Assert::same($internalMessage->serialized(), $internalMessage2->serialized());
 		Assert::notSame($internalMessage, $internalMessage2);
+	}
+
+
+	public function testMinimalSize(): void
+	{
+		Assert::same(Config::MINIMAL_QUEUE_SIZE, strlen((new InternalMessage('', 1, true))->serialized()));
 	}
 }
 
