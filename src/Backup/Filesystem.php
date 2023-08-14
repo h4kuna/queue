@@ -14,13 +14,10 @@ final class Filesystem implements Backup
 	}
 
 
-	public function save(string $message, int $messageType, bool $blocking): InternalMessage
+	public function save(InternalMessage $internalMessage): void
 	{
-		$internalMessage = new InternalMessage($message, $messageType, $blocking);
 		$path = $this->dir->filename($internalMessage->id);
 		file_put_contents($path, $internalMessage->serialized());
-
-		return $internalMessage;
 	}
 
 

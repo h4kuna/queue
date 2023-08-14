@@ -6,7 +6,7 @@ use h4kuna\Queue\SystemV\MsgInterface;
 
 interface Backup
 {
-	public function save(string $message, int $messageType, bool $blocking): InternalMessage;
+	public function save(InternalMessage $internalMessage): void;
 
 
 	public function needRestore(): bool;

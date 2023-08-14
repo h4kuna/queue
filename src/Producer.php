@@ -29,9 +29,9 @@ final class Producer
 
 	private function save(string $message, int $messageType, bool $blocking): void
 	{
-		$this->msg->send(
-			$this->backup->save($message, $messageType, $blocking)
-		);
+		$internalMessage = new InternalMessage($message, $messageType, $blocking);
+		$this->msg->send($internalMessage);
+		$this->backup->save($internalMessage);
 	}
 
 }

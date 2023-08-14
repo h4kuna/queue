@@ -8,9 +8,8 @@ use h4kuna\Queue\SystemV\MsgInterface;
 
 final class DevNull implements Backup
 {
-	public function save(string $message, int $messageType, bool $blocking): InternalMessage
+	public function save(InternalMessage $internalMessage): void
 	{
-		return new InternalMessage($message, $messageType, $blocking);
 	}
 
 

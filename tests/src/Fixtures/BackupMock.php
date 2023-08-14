@@ -13,9 +13,8 @@ final class BackupMock implements Backup
 	}
 
 
-	public function save(string $message, int $messageType, bool $blocking): InternalMessage
+	public function save(InternalMessage $internalMessage): void
 	{
-		return new InternalMessage($message, $messageType, $blocking);
 	}
 
 
