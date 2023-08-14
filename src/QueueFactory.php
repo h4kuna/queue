@@ -33,12 +33,12 @@ class QueueFactory
 	): Queue
 	{
 		assert($this->tempDir !== null);
-		$queueDir = $this->tempDir->dir('queue');
+		$queueDir = $this->tempDir->dir("queue/$name");
 
 		$msg = $this->createMsg($queueDir, $name, $projectId, $permission, $messageSize);
 
 		if ($backUp === null) {
-			$backUp = $this->createBackup($queueDir->dir("message/$name"));
+			$backUp = $this->createBackup($queueDir);
 		}
 
 		return new Queue($backUp, $msg);
@@ -53,8 +53,7 @@ class QueueFactory
 		?int $messageSize
 	): MsgInterface
 	{
-		$filename = $queueDir->filename($name);
-		is_file($filename) || touch($filename);
+		$filename = $queueDir->getDir();
 
 		if ($projectId === null) {
 			if (preg_match('/(?<projectId>[a-z\d]{1})/i', $name, $match) === false) {
