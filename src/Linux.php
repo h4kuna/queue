@@ -6,7 +6,9 @@ use SplFileObject;
 
 final class Linux
 {
-
+	/**
+	 * @see https://www.php.net/manual/en/function.fileperms
+	 */
 	public static function permissionInToText(int $perms): string
 	{
 		$info = '';
