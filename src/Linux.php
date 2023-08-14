@@ -6,33 +6,32 @@ use SplFileObject;
 
 final class Linux
 {
-	/**
-	 * @var array<int, string>
-	 */
-	private static array $permission = [
-		4 => 'r',
-		2 => 'w',
-		1 => 'x',
-	];
 
-
-	public static function permissionInToText(int $permission): string
+	public static function permissionInToText(int $perms): string
 	{
-		$value = decoct($permission);
-		$permissionArray = array_map('intval', str_split($value));
-		$output = '';
-		foreach ($permissionArray as $p) {
-			foreach (self::$permission as $num => $str) {
-				if ($p < $num) {
-					$output .= '-';
-				} else {
-					$output .= $str;
-					$p -= $num;
-				}
-			}
-		}
+		$info = '';
+		// Owner
+		$info .= (($perms & 0x0100) === 0 ? '-' : 'r');
+		$info .= (($perms & 0x0080) === 0 ? '-' : 'w');
+		$info .= (($perms & 0x0040) === 0
+			? (($perms & 0x0800) === 0 ? '-' : 'S')
+			: (($perms & 0x0800) === 0 ? 'x' : 's'));
 
-		return str_pad($output, 9, '-', STR_PAD_LEFT);
+		// Group
+		$info .= (($perms & 0x0020) === 0 ? '-' : 'r');
+		$info .= (($perms & 0x0010) === 0 ? '-' : 'w');
+		$info .= (($perms & 0x0008) === 0
+			? (($perms & 0x0400) === 0 ? '-' : 'S')
+			: (($perms & 0x0400) === 0 ? 'x' : 's'));
+
+		// All
+		$info .= (($perms & 0x0004) === 0 ? '-' : 'r');
+		$info .= (($perms & 0x0002) === 0 ? '-' : 'w');
+		$info .= (($perms & 0x0001) === 0
+			? (($perms & 0x0200) === 0 ? '-' : 'T')
+			: (($perms & 0x0200) === 0 ? 'x' : 't'));
+
+		return $info;
 	}
 
 
