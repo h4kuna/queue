@@ -47,4 +47,13 @@ final class Consumer
 		return $internalMessage->createMessage();
 	}
 
+
+	public function flush(): void
+	{
+		while ($this->tryReceive() !== null) {
+			// empty
+		}
+		$this->msg->remove();
+	}
+
 }
