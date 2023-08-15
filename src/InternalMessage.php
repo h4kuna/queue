@@ -4,9 +4,11 @@ namespace h4kuna\Queue;
 
 class InternalMessage
 {
+	private const RECEIVE_TYPE_UNDEFINED = 0;
+
 	private string $serialized = '';
 
-	private int $receiveMsgType = 0;
+	private int $receiveMsgType = self::RECEIVE_TYPE_UNDEFINED;
 
 	private bool $compress = false;
 
@@ -36,7 +38,7 @@ class InternalMessage
 	}
 
 
-	public static function unserialize(string $content, int $receiveMessageType = 0): self
+	public static function unserialize(string $content, int $receiveMessageType = self::RECEIVE_TYPE_UNDEFINED): self
 	{
 		$internalMessage = self::unserializeCsv($content);
 		$internalMessage->setReceiveMsgType($receiveMessageType);
