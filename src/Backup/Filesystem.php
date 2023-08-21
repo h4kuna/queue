@@ -41,13 +41,14 @@ final class Filesystem implements Backup
 	}
 
 
-	public function restore(MsgInterface $msg): void
+	public function restore(MsgInterface $msg): array
 	{
 		$files = scandir($this->dir->getDir(), SCANDIR_SORT_ASCENDING);
 		if ($files === false) {
-			return;
+			return [];
 		}
 
+		$messages = [];
 		foreach ($files as $file) {
 			if ($file === '.' || $file === '..') {
 				continue;
@@ -55,8 +56,12 @@ final class Filesystem implements Backup
 			$content = file_get_contents($this->dir->filename($file));
 			assert(is_string($content));
 
-			$msg->send(InternalMessage::unserialize($content));
+			$internalMessage = InternalMessage::unserialize($content);
+			$msg->send($internalMessage);
+			$messages[] = $internalMessage->message;
 		}
+
+		return $messages;
 	}
 
 }

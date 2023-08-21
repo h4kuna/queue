@@ -12,7 +12,10 @@ interface Backup
 	public function needRestore(): bool;
 
 
-	public function restore(MsgInterface $msg): void;
+	/**
+	 * @return array<string>
+	 */
+	public function restore(MsgInterface $msg): array;
 
 
 	public function remove(InternalMessage $internalMessage): void;

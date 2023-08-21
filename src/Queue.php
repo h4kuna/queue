@@ -86,13 +86,17 @@ final class Queue
 	}
 
 
-	public function restore(bool $remove = true): void
+	/**
+	 * @return array<string>
+	 */
+	public function restore(bool $remove = true): array
 	{
 		$remove && $this->msg->remove();
 		if ($this->backup->needRestore()) {
 			$this->msg->remove();
-			$this->backup->restore($this->msg);
+			return $this->backup->restore($this->msg);
 		}
+		return [];
 	}
 
 }

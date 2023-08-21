@@ -19,8 +19,9 @@ final class DevNull implements Backup
 	}
 
 
-	public function restore(MsgInterface $msg): void
+	public function restore(MsgInterface $msg): array
 	{
+		return [];
 	}
 
 
