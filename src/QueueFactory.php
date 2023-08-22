@@ -33,7 +33,7 @@ class QueueFactory
 	): Queue
 	{
 		assert($this->tempDir !== null);
-		$queueDir = $this->tempDir->dir("queue/$name");
+		$queueDir = $this->tempDir->dir($name);
 
 		$msg = $this->createMsg($queueDir, $name, $projectId, $permission, $messageSize);
 
