@@ -35,9 +35,7 @@ final class Filesystem implements Backup
 	public function remove(InternalMessage $internalMessage): void
 	{
 		$path = $this->dir->filename($internalMessage->id);
-		if (is_file($path)) {
-			unlink($path);
-		}
+		is_file($path) && unlink($path);
 	}
 
 

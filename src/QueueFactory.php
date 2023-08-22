@@ -12,7 +12,7 @@ class QueueFactory
 {
 
 	public function __construct(
-		protected /*readonly*/ int $permission = 0666,
+		protected /*readonly*/ int $permission = 0666, // 0o666 from 8.1
 		protected /*readonly*/ ?Dir $tempDir = null,
 		protected /*readonly*/ int $messageSize = MsgInterface::MAX_MESSAGE_SIZE
 	)

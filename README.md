@@ -1,9 +1,6 @@
 # Queue
 
-This use native php queue [msg_* functions](https://www.php.net/manual/en/function.msg-get-queue.php). Keep default
-parameters and does not support native serialize, message is only string.
-
-> The queue does not survive the server restart.
+This use native php queue [msg_* functions](https://www.php.net/manual/en/function.msg-get-queue.php).
 
 ### Installation by composer
 
@@ -43,10 +40,12 @@ $queue->consumer()->receive(Queue\Config::TYPE_ALL)->message === 'Hello'
 ```
 
 ## Limitations
-- queue size is 120
-- the consumer can be only one, if queue failed
+
+This is not server, it can run as only instance on current computer.
 
 ## Catch receive error
+
+The queue has backup implementation by [Backup](src/Backup/Filesystem.php).
 
 ```php
 use h4kuna\Queue;
@@ -57,18 +56,16 @@ $queueFactory = new Queue\QueueFactory();
 /** @var Queue\Queue $queue */
 $queue = $queueFactory->create('my-queue');
 
-tryAgain:
-$queue->restore();
-try {
-    $message = $queue->consumer()->receive();
-    // ... 
-} catch (Queue\ReceiveException $e) {
-    // log error
-    sleep(1); // wait and try again, for less CPU usage and log spam
-    goto tryAgain;
-}
-
-
+$queue->restore(); // restore from backup, after restart
+do {
+    try {
+        $message = $queue->consumer()->receive();
+        // ... 
+    } catch (Queue\ReceiveException $e) {
+        // log error
+        // stop process if code is 22
+    }
+} while(true);
 ```
 
 ### List of queues
