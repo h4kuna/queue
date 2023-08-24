@@ -3,16 +3,21 @@
 namespace h4kuna\Queue;
 
 use DateTimeImmutable;
-use h4kuna\Memoize\MemoryStorage;
+use h4kuna\Queue\Build\Backup;
+use h4kuna\Queue\Build\ConsumerAccessor;
+use h4kuna\Queue\Build\ProducesAccessor;
+use h4kuna\Queue\Msg\Consumer;
+use h4kuna\Queue\Msg\Producer;
 use h4kuna\Queue\SystemV\MsgInterface;
 
 final class Queue
 {
-	use MemoryStorage;
 
 	public function __construct(
 		private Backup $backup,
 		private MsgInterface $msg,
+		private ProducesAccessor $producesAccessor,
+		private ConsumerAccessor $consumerAccessor,
 	)
 	{
 	}
@@ -72,17 +77,13 @@ final class Queue
 
 	public function consumer(): Consumer
 	{
-		return $this->memoize(__METHOD__, function (): Consumer {
-			return new Consumer($this->backup, $this->msg);
-		});
+		return $this->consumerAccessor->get();
 	}
 
 
 	public function producer(): Producer
 	{
-		return $this->memoize(__METHOD__, function (): Producer {
-			return new Producer($this->backup, $this->msg);
-		});
+		return $this->producesAccessor->get();
 	}
 
 

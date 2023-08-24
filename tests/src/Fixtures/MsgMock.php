@@ -2,7 +2,7 @@
 
 namespace h4kuna\Queue\Tests\Fixtures;
 
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\SystemV\MsgInterface;
 
 final class MsgMock implements MsgInterface

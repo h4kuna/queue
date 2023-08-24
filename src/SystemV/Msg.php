@@ -4,7 +4,7 @@ namespace h4kuna\Queue\SystemV;
 
 use h4kuna\Queue\Config;
 use h4kuna\Queue\Exceptions;
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Msg\InternalMessage;
 use SysvMessageQueue;
 
 final class Msg implements MsgInterface
@@ -68,10 +68,6 @@ final class Msg implements MsgInterface
 		);
 
 		self::checkSuccessAndError($success, $error);
-
-		if ($error === 4 && function_exists('pcntl_signal_dispatch')) {
-			pcntl_signal_dispatch();
-		}
 
 		switch ($error) {
 			case 0:

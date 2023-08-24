@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue;
+namespace h4kuna\Queue\Msg;
+
+use h4kuna\Queue\Exceptions\InvalidStateException;
 
 class InternalMessage
 {
@@ -21,7 +23,7 @@ class InternalMessage
 	)
 	{
 		if ($this->type <= 0) {
-			throw new Exceptions\InvalidStateException('Message type MUST be greater than 0.');
+			throw new InvalidStateException('Message type MUST be greater than 0.');
 		}
 
 		if ($this->id === '') {

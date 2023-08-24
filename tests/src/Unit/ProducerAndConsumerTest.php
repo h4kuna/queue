@@ -3,8 +3,8 @@
 namespace h4kuna\Queue\Tests\Unit;
 
 use h4kuna;
-use h4kuna\Queue\Consumer;
-use h4kuna\Queue\Producer;
+use h4kuna\Queue\Msg\Consumer;
+use h4kuna\Queue\Msg\Producer;
 use h4kuna\Queue\Tests\Fixtures\BackupMock;
 use h4kuna\Queue\Tests\Fixtures\MsgMock;
 use Tester\Assert;

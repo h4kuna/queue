@@ -2,8 +2,8 @@
 
 namespace h4kuna\Queue\Tests\Fixtures;
 
-use h4kuna\Queue\Backup;
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Build\Backup;
+use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\SystemV\MsgInterface;
 
 final class BackupMock implements Backup

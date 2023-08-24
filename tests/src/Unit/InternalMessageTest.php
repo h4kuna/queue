@@ -3,7 +3,7 @@
 namespace h4kuna\Queue\Tests\Unit;
 
 use h4kuna\Queue\Config;
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Msg\InternalMessage;
 use Tester\Assert;
 use Tester\TestCase;
 

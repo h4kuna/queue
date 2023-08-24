@@ -2,7 +2,7 @@
 
 namespace h4kuna\Queue\Tests\Unit;
 
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\Tests\TestCase;
 use h4kuna\Serialize\Driver\IgBinary;
 use h4kuna\Serialize\Driver\Php;

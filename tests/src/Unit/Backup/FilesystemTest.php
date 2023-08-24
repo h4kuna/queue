@@ -4,7 +4,7 @@ namespace h4kuna\Queue\Tests\Unit\Backup;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\Backup\Filesystem;
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\Tests\Fixtures\MsgMock;
 use h4kuna\Queue\Tests\TestCase;
 use Tester\Assert;

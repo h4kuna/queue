@@ -1,7 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue;
+namespace h4kuna\Queue\Msg;
 
+use h4kuna\Queue\Build\Backup;
+use h4kuna\Queue\Config;
+use h4kuna\Queue\Exceptions;
 use h4kuna\Queue\SystemV\MsgInterface;
 
 final class Consumer

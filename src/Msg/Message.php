@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue;
+namespace h4kuna\Queue\Msg;
 
 final class Message
 {

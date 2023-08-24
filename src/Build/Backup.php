@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue;
+namespace h4kuna\Queue\Build;
 
+use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\SystemV\MsgInterface;
 
 interface Backup

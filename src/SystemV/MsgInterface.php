@@ -3,7 +3,7 @@
 namespace h4kuna\Queue\SystemV;
 
 use h4kuna\Queue\Exceptions;
-use h4kuna\Queue\InternalMessage;
+use h4kuna\Queue\Msg\InternalMessage;
 
 interface MsgInterface
 {

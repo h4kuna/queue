@@ -4,11 +4,15 @@ namespace h4kuna\Queue;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Dir\TempDir;
+use h4kuna\Queue\Backup\Filesystem;
+use h4kuna\Queue\Build\Backup;
+use h4kuna\Queue\Build\Consumer;
+use h4kuna\Queue\Build\Producer;
 use h4kuna\Queue\Exceptions\CreateQueueException;
 use h4kuna\Queue\SystemV\Msg;
 use h4kuna\Queue\SystemV\MsgInterface;
 
-class QueueFactory
+class QueueFactory implements Build\QueueFactory
 {
 
 	public function __construct(
@@ -41,7 +45,12 @@ class QueueFactory
 			$backUp = $this->createBackup($queueDir);
 		}
 
-		return new Queue($backUp, $msg);
+		return new Queue(
+			$backUp,
+			$msg,
+			new Producer($backUp, $msg),
+			new Consumer($backUp, $msg),
+		);
 	}
 
 
@@ -68,6 +77,6 @@ class QueueFactory
 
 	protected function createBackup(Dir $messageDir): Backup
 	{
-		return new Backup\Filesystem($messageDir);
+		return new Filesystem($messageDir);
 	}
 }
