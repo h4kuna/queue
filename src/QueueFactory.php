@@ -37,7 +37,7 @@ class QueueFactory
 		assert($this->tempDir !== null);
 		$queueDir = $this->tempDir->dir($name);
 
-		$msg = $this->createMsg($queueDir, $name, $projectId, $permission, $messageSize);
+		$msg = $this->createMsg($queueDir, $name, $projectId, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
 
 		return new Queue(
 			$msg,
@@ -51,8 +51,8 @@ class QueueFactory
 		Dir $queueDir,
 		string $name,
 		?string $projectId,
-		?int $permission,
-		?int $messageSize
+		int $permission,
+		int $messageSize
 	): MessageQueue
 	{
 		$backUp = $this->createBackup($queueDir);
@@ -66,7 +66,7 @@ class QueueFactory
 			$projectId = $match['projectId'];
 		}
 
-		return new Msg($filename, $projectId, $permission ?? $this->permission, $backUp, $messageSize ?? $this->messageSize);
+		return new Msg($filename, $projectId, $permission, $backUp, $messageSize);
 	}
 
 
@@ -74,4 +74,5 @@ class QueueFactory
 	{
 		return new Filesystem($messageDir);
 	}
+
 }

@@ -42,6 +42,8 @@ final class FileSystemQueueFactoryTest extends TestCase
 		Assert::same('Four', $message->message);
 
 		Assert::same('system-f', $queue->msg()->name());
+
+		// $queue->consumer()->receive();
 	}
 
 }

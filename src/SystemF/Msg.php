@@ -4,13 +4,18 @@ namespace h4kuna\Queue\SystemF;
 
 use Generator;
 use h4kuna\Dir\Dir;
-use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\MessageQueue;
+use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\Utils\ScanDir;
 
 final class Msg implements MessageQueue
 {
-	public function __construct(private int $permission, private Dir $dir, private ActiveWait $activeWait)
+	public function __construct(
+		private int $permission,
+		private Dir $dir,
+		private ActiveWait $activeWait,
+		private ?Inotify $inotify = null
+	)
 	{
 	}
 
@@ -30,6 +35,10 @@ final class Msg implements MessageQueue
 		}
 		$message = null;
 		$this->activeWait->run(function () use ($messageType, &$message) {
+			if ($this->inotify !== null && ScanDir::content($this->dir) === []) {
+				$this->inotify->wait();
+			}
+
 			$message = $this->findMessage($messageType);
 			return $message !== null;
 		});
