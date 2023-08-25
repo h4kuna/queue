@@ -4,7 +4,7 @@ namespace h4kuna\Queue\Tests\Unit;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Queue;
-use h4kuna\Queue\SystemV\MsgInterface;
+use h4kuna\Queue\MessageQueue;
 use h4kuna\Queue\Tests\TestCase;
 use Tester\Assert;
 
@@ -35,7 +35,7 @@ final class QueueFactoryTest extends TestCase
 
 		$queue = $queueFactory->create('my-queue-receive', messageSize: 30);
 		$queue->msg()->remove();
-		Assert::true($queue->msg()->setup([MsgInterface::INFO_SETUP_BYTES => 128]));
+		Assert::true($queue->msg()->setup([MessageQueue::INFO_SETUP_BYTES => 128]));
 
 		Assert::null($queue->consumer()->tryReceive(0));
 		Assert::null($queue->consumer()->tryReceive(0));

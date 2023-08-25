@@ -20,10 +20,9 @@ final class ProducerAndConsumerTest extends TestCase
 
 	public function testBasic(): void
 	{
-		$backup = new BackupMock();
 		$msg = new MsgMock();
-		$producer = new Producer($backup, $msg);
-		$consumer = new Consumer($backup, $msg);
+		$producer = new Producer($msg);
+		$consumer = new Consumer($msg);
 
 		$producer->send('Hello');
 
@@ -37,7 +36,7 @@ final class ProducerAndConsumerTest extends TestCase
 	 */
 	public function testMessageTypeIsNegative(): void
 	{
-		$producer = new Producer(new BackupMock(), new MsgMock);
+		$producer = new Producer(new MsgMock());
 		$producer->send('Hello', -1);
 	}
 

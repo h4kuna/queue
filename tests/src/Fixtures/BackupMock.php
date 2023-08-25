@@ -2,9 +2,9 @@
 
 namespace h4kuna\Queue\Tests\Fixtures;
 
-use h4kuna\Queue\Build\Backup;
 use h4kuna\Queue\Msg\InternalMessage;
-use h4kuna\Queue\SystemV\MsgInterface;
+use h4kuna\Queue\MessageQueue;
+use h4kuna\Queue\SystemV\Backup;
 
 final class BackupMock implements Backup
 {
@@ -24,7 +24,7 @@ final class BackupMock implements Backup
 	}
 
 
-	public function restore(MsgInterface $msg): array
+	public function restore(MessageQueue $msg): array
 	{
 		return [];
 	}

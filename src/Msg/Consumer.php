@@ -2,15 +2,15 @@
 
 namespace h4kuna\Queue\Msg;
 
-use h4kuna\Queue\Build\Backup;
 use h4kuna\Queue\Config;
 use h4kuna\Queue\Exceptions;
-use h4kuna\Queue\SystemV\MsgInterface;
+use h4kuna\Queue\MessageQueue;
+use h4kuna\Queue\SystemV\Backup;
 
 final class Consumer
 {
 
-	public function __construct(private Backup $backup, private MsgInterface $msg)
+	public function __construct(private MessageQueue $msg)
 	{
 	}
 
@@ -44,8 +44,6 @@ final class Consumer
 		if ($internalMessage === null) {
 			return null;
 		}
-
-		$this->backup->remove($internalMessage);
 
 		return $internalMessage->createMessage();
 	}

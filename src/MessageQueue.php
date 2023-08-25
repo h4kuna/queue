@@ -1,11 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue\SystemV;
+namespace h4kuna\Queue;
 
-use h4kuna\Queue\Exceptions;
 use h4kuna\Queue\Msg\InternalMessage;
 
-interface MsgInterface
+interface MessageQueue
 {
 	public const INFO_SETUP_UID = 'msg_perm.uid';
 	public const INFO_SETUP_GID = 'msg_perm.gid';

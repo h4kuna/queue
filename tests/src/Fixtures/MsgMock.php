@@ -3,9 +3,9 @@
 namespace h4kuna\Queue\Tests\Fixtures;
 
 use h4kuna\Queue\Msg\InternalMessage;
-use h4kuna\Queue\SystemV\MsgInterface;
+use h4kuna\Queue\MessageQueue;
 
-final class MsgMock implements MsgInterface
+final class MsgMock implements MessageQueue
 {
 	public ?InternalMessage $internalMessage = null;
 

@@ -4,21 +4,20 @@ namespace h4kuna\Queue;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Dir\TempDir;
-use h4kuna\Queue\Backup\Filesystem;
-use h4kuna\Queue\Build\Backup;
-use h4kuna\Queue\Build\Consumer;
-use h4kuna\Queue\Build\Producer;
 use h4kuna\Queue\Exceptions\CreateQueueException;
+use h4kuna\Queue\Msg\Consumer;
+use h4kuna\Queue\Msg\Producer;
+use h4kuna\Queue\SystemV\Backup;
+use h4kuna\Queue\SystemV\Backup\Filesystem;
 use h4kuna\Queue\SystemV\Msg;
-use h4kuna\Queue\SystemV\MsgInterface;
 
-class QueueFactory implements Build\QueueFactory
+class QueueFactory
 {
 
 	public function __construct(
 		protected /*readonly*/ int $permission = 0666, // 0o666 from 8.1
 		protected /*readonly*/ ?Dir $tempDir = null,
-		protected /*readonly*/ int $messageSize = MsgInterface::MAX_MESSAGE_SIZE
+		protected /*readonly*/ int $messageSize = MessageQueue::MAX_MESSAGE_SIZE
 	)
 	{
 		$this->tempDir ??= new TempDir();
@@ -33,7 +32,6 @@ class QueueFactory implements Build\QueueFactory
 		?string $projectId = null,
 		?int $permission = null,
 		?int $messageSize = null,
-		?Backup $backUp = null,
 	): Queue
 	{
 		assert($this->tempDir !== null);
@@ -41,15 +39,10 @@ class QueueFactory implements Build\QueueFactory
 
 		$msg = $this->createMsg($queueDir, $name, $projectId, $permission, $messageSize);
 
-		if ($backUp === null) {
-			$backUp = $this->createBackup($queueDir);
-		}
-
 		return new Queue(
-			$backUp,
 			$msg,
-			new Producer($backUp, $msg),
-			new Consumer($backUp, $msg),
+			new Producer($msg),
+			new Consumer($msg),
 		);
 	}
 
@@ -60,8 +53,10 @@ class QueueFactory implements Build\QueueFactory
 		?string $projectId,
 		?int $permission,
 		?int $messageSize
-	): MsgInterface
+	): MessageQueue
 	{
+		$backUp = $this->createBackup($queueDir);
+
 		$filename = $queueDir->getDir();
 
 		if ($projectId === null) {
@@ -71,7 +66,7 @@ class QueueFactory implements Build\QueueFactory
 			$projectId = $match['projectId'];
 		}
 
-		return new Msg($filename, $projectId, $permission ?? $this->permission, $messageSize ?? $this->messageSize);
+		return new Msg($filename, $projectId, $permission ?? $this->permission, $backUp, $messageSize ?? $this->messageSize);
 	}
 
 

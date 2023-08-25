@@ -4,10 +4,11 @@ namespace h4kuna\Queue\SystemV;
 
 use h4kuna\Queue\Config;
 use h4kuna\Queue\Exceptions;
+use h4kuna\Queue\MessageQueue;
 use h4kuna\Queue\Msg\InternalMessage;
 use SysvMessageQueue;
 
-final class Msg implements MsgInterface
+final class Msg implements MessageQueue
 {
 	private ?SysvMessageQueue $resource = null;
 
@@ -16,6 +17,7 @@ final class Msg implements MsgInterface
 		private string $filename,
 		private string $projectId,
 		private int $permission,
+		private Backup $backup,
 		private int $maxMessageSize = self::MAX_MESSAGE_SIZE,
 	)
 	{
@@ -37,6 +39,7 @@ final class Msg implements MsgInterface
 
 		switch ($error) {
 			case 0:
+				$this->backup->save($internalMessage);
 				return; // ok
 			case Config::QUEUE_IS_FULL:
 				try {
@@ -71,7 +74,10 @@ final class Msg implements MsgInterface
 
 		switch ($error) {
 			case 0:
-				return InternalMessage::unserialize($message, $msgType); // ok
+				$internalMessage = InternalMessage::unserialize($message, $msgType); // ok
+				$this->backup->remove($internalMessage);
+
+				return $internalMessage;
 			case Config::QUEUE_ERROR:
 				throw new Exceptions\ReceiveException(sprintf('Another process remove queue "%s", error code "%s".',
 					$this->name(), $error), $error);
@@ -98,10 +104,10 @@ final class Msg implements MsgInterface
 	public function setup(array $data): bool
 	{
 		$structure = [
-			MsgInterface::INFO_SETUP_UID,
-			MsgInterface::INFO_SETUP_GID,
-			MsgInterface::INFO_SETUP_MODE,
-			MsgInterface::INFO_SETUP_BYTES,
+			MessageQueue::INFO_SETUP_UID,
+			MessageQueue::INFO_SETUP_GID,
+			MessageQueue::INFO_SETUP_MODE,
+			MessageQueue::INFO_SETUP_BYTES,
 		];
 
 		return msg_set_queue($this->resource(), array_intersect_key($data, array_fill_keys($structure, true)));
@@ -123,6 +129,20 @@ final class Msg implements MsgInterface
 	public function name(): string
 	{
 		return basename($this->filename);
+	}
+
+
+	/**
+	 * @return array<string>
+	 */
+	public function restore(bool $remove = true): array
+	{
+		$remove && $this->remove();
+		if ($this->backup->needRestore()) {
+			$this->remove();
+			return $this->backup->restore($this);
+		}
+		return [];
 	}
 
 

@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace h4kuna\Queue\Build;
+namespace h4kuna\Queue\SystemV;
 
 use h4kuna\Queue\Msg\InternalMessage;
-use h4kuna\Queue\SystemV\MsgInterface;
+use h4kuna\Queue\MessageQueue;
 
 interface Backup
 {
@@ -16,7 +16,7 @@ interface Backup
 	/**
 	 * @return array<string>
 	 */
-	public function restore(MsgInterface $msg): array;
+	public function restore(MessageQueue $msg): array;
 
 
 	public function remove(InternalMessage $internalMessage): void;
