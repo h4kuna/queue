@@ -36,7 +36,8 @@
     }
   },
   "suggest": {
-    "ext-lib": "For compress messages, lobger then 150 chars."
+    "ext-lib": "For compress messages, lobger then 150 chars.",
+    "ext-inotify": "For passive waiting, if you want to use SystemF."
   },
   "config": {
     "sort-packages": true

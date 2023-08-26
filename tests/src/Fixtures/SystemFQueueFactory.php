@@ -12,12 +12,9 @@ final class SystemFQueueFactory extends QueueFactory
 	protected function createMsg(
 		Dir $queueDir,
 		string $name,
-		?string $projectId,
-		int $permission,
-		int $messageSize
 	): MessageQueue
 	{
-		return (new MsgFactory())->create($permission, $queueDir);
+		return (new MsgFactory())->create($this->permission, $queueDir);
 	}
 
 }

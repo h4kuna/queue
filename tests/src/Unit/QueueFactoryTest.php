@@ -33,7 +33,8 @@ final class QueueFactoryTest extends TestCase
 	{
 		$queueFactory = new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'));
 
-		$queue = $queueFactory->create('my-queue-receive', messageSize: 30);
+		$size = Queue\Config::MINIMAL_QUEUE_SIZE + 4;
+		$queue = $queueFactory->create('my-queue-receive', messageSize: $size);
 		$queue->msg()->remove();
 		Assert::true($queue->msg()->setup([MessageQueue::INFO_SETUP_BYTES => 128]));
 
@@ -42,7 +43,7 @@ final class QueueFactoryTest extends TestCase
 		Assert::null($queue->consumer()->tryReceive(0));
 
 		Assert::exception(fn (
-		) => $queue->producer()->send('Hello'), Queue\Exceptions\SendException::class, 'Message is too long for queue "my-queue-receive", allowed size is "30" and you have "31".');
+		) => $queue->producer()->send('Hello'), Queue\Exceptions\SendException::class, sprintf('Message is too long for queue "my-queue-receive", allowed size is "%d" and you have "%d".', $size, $size + 1));
 
 		Assert::null($queue->consumer()->tryReceive());
 

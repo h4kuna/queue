@@ -4,6 +4,7 @@ namespace h4kuna\Queue\SystemF;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\MessageQueue;
+use h4kuna\Queue\SysvMsg\FtokFactory;
 
 final class MsgFactory
 {
@@ -19,7 +20,10 @@ final class MsgFactory
 			$inotify = new Inotify($dir);
 		}
 
-		return new Msg($permission, $dir, new ActiveWait($this->sleep), $inotify);
+		$name = basename($dir->getDir());
+		$mutex = new Mutex($name, FtokFactory::create($dir, $name));
+
+		return new Msg($permission, $dir, new ActiveWait($this->sleep), $mutex, $inotify);
 	}
 
 }

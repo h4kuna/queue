@@ -2,15 +2,14 @@
 
 namespace h4kuna\Queue\Msg;
 
+use h4kuna\Queue\Config;
 use h4kuna\Queue\Exceptions\InvalidStateException;
 
 class InternalMessage
 {
-	private const RECEIVE_TYPE_UNDEFINED = 0;
-
 	private string $serialized = '';
 
-	private int $receiveMsgType = self::RECEIVE_TYPE_UNDEFINED;
+	private int $receiveMsgType = Config::TYPE_ALL;
 
 	private bool $compress = false;
 
@@ -35,12 +34,15 @@ class InternalMessage
 	private static function random(): string
 	{
 		$right = bin2hex(random_bytes(2));
-		$left = number_format(microtime(true), 4, '.', '');
-		return "$left-$right";
+		preg_match('/^0(?<dec>\.\d{6}).* (?<time>\d+)$/U', microtime(), $match);
+		// microtime(true) has only 4 decimals I need 6
+		assert(isset($match['time'], $match['dec']));
+
+		return "{$match['time']}{$match['dec']}-$right";
 	}
 
 
-	public static function unserialize(string $content, int $receiveMessageType = self::RECEIVE_TYPE_UNDEFINED): self
+	public static function unserialize(string $content, int $receiveMessageType = Config::TYPE_ALL): self
 	{
 		$internalMessage = self::unserializeCsv($content);
 		$internalMessage->setReceiveMsgType($receiveMessageType);

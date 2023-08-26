@@ -14,8 +14,8 @@ final class Msg implements MessageQueue
 
 
 	public function __construct(
-		private string $filename,
-		private string $projectId,
+		private string $name,
+		private int $ftok,
 		private int $permission,
 		private Backup $backup,
 		private int $maxMessageSize = self::MAX_MESSAGE_SIZE,
@@ -128,7 +128,7 @@ final class Msg implements MessageQueue
 
 	public function name(): string
 	{
-		return basename($this->filename);
+		return $this->name;
 	}
 
 
@@ -148,7 +148,7 @@ final class Msg implements MessageQueue
 
 	private function exists(): bool
 	{
-		return msg_queue_exists($this->queueKey());
+		return msg_queue_exists($this->ftok);
 	}
 
 
@@ -164,7 +164,7 @@ final class Msg implements MessageQueue
 
 	private function createResource(): SysvMessageQueue
 	{
-		$queue = msg_get_queue($this->queueKey(), $this->permission);
+		$queue = msg_get_queue($this->ftok, $this->permission);
 
 		if ($queue === false) {
 			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create.', $this->name()));
@@ -191,18 +191,6 @@ final class Msg implements MessageQueue
 	}
 
 
-	private function queueKey(): int
-	{
-		$key = ftok($this->filename, $this->projectId);
-		if ($key === -1) {
-			throw new Exceptions\CreateQueueException(sprintf('Queue "%s" failed to create. Probably file does not exists "%s" or project id "%s" is not valid.',
-				$this->name(), $this->filename, $this->projectId));
-		}
-
-		return $key;
-	}
-
-
 	private static function checkSuccessAndError(bool $success, int $error): void
 	{
 		if ($success === false && $error === 0) {
@@ -213,7 +201,7 @@ final class Msg implements MessageQueue
 
 	private function helpHowRemove(int $permission): string
 	{
-		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->queueKey(), $permission);
+		return sprintf("Remove exist queue by cli: php -r 'msg_remove_queue(msg_get_queue(%s, %s));'", $this->ftok, $permission);
 	}
 
 

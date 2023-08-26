@@ -4,6 +4,7 @@ namespace h4kuna\Queue\SystemF;
 
 use Generator;
 use h4kuna\Dir\Dir;
+use h4kuna\Queue\Config;
 use h4kuna\Queue\MessageQueue;
 use h4kuna\Queue\Msg\InternalMessage;
 use h4kuna\Queue\Utils\ScanDir;
@@ -14,7 +15,8 @@ final class Msg implements MessageQueue
 		private int $permission,
 		private Dir $dir,
 		private ActiveWait $activeWait,
-		private ?Inotify $inotify = null
+		private Mutex $mutex,
+		private ?Inotify $inotify = null,
 	)
 	{
 	}
@@ -113,20 +115,32 @@ final class Msg implements MessageQueue
 	}
 
 
-	private function findMessage(int $messageType): ?InternalMessage
+	/**
+	 * @return Generator<string, InternalMessage>
+	 */
+	public function read(int $messageType = Config::TYPE_ALL): Generator
 	{
 		foreach ($this->source() as $file) {
 			$content = file_get_contents($file);
 			assert(is_string($content));
-			$message = InternalMessage::unserialize($content, $messageType);
-			if ($messageType !== 0 && $messageType !== $message->type) {
-				continue;
-			}
-			@unlink($file);
-			return $message;
+			yield $file => InternalMessage::unserialize($content, $messageType);
 		}
+	}
 
-		return null;
+
+	private function findMessage(int $messageType): ?InternalMessage
+	{
+		return $this->mutex->synchronized(function () use ($messageType): ?InternalMessage {
+			foreach ($this->read($messageType) as $file => $message) {
+				if ($messageType !== 0 && $messageType !== $message->type) {
+					continue;
+				}
+				@unlink($file);
+				return $message;
+			}
+
+			return null;
+		});
 	}
 
 }
