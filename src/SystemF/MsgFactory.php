@@ -4,7 +4,7 @@ namespace h4kuna\Queue\SystemF;
 
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\MessageQueue;
-use h4kuna\Queue\SysvMsg\FtokFactory;
+use h4kuna\Queue\SystemF\Lock\NoLock;
 
 final class MsgFactory
 {
@@ -13,17 +13,18 @@ final class MsgFactory
 	}
 
 
-	public function create(int $permission, Dir $dir): MessageQueue
+	public function create(int $permission, Dir $dir, ?Lock $lock = null): MessageQueue
 	{
 		$inotify = null;
 		if (extension_loaded('inotify')) {
 			$inotify = new Inotify($dir);
 		}
 
-		$name = basename($dir->getDir());
-		$mutex = new Mutex($name, FtokFactory::create($dir, $name));
+		if ($lock === null) {
+			$lock = new NoLock();
+		}
 
-		return new Msg($permission, $dir, new ActiveWait($this->sleep), $mutex, $inotify);
+		return new Msg($permission, $dir, new ActiveWait($this->sleep), $lock, $inotify);
 	}
 
 }

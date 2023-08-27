@@ -15,7 +15,7 @@ final class Msg implements MessageQueue
 		private int $permission,
 		private Dir $dir,
 		private ActiveWait $activeWait,
-		private Mutex $mutex,
+		private Lock $mutex,
 		private ?Inotify $inotify = null,
 	)
 	{
