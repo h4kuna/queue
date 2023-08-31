@@ -12,5 +12,5 @@ interface Config
 	public const QUEUE_ERROR = 43;
 	public const QUEUE_IS_FULL = 11;
 
-	public const MINIMAL_QUEUE_SIZE = 28;
+	public const MINIMAL_QUEUE_SIZE = 29;
 }

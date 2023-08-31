@@ -73,8 +73,8 @@ class InternalMessage
 			$this->id,
 			$message,
 			$this->type,
-			$this->isBlocking,
-			$this->compress,
+			(int) $this->isBlocking,
+			(int) $this->compress,
 		]);
 	}
 
