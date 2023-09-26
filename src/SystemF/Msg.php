@@ -14,6 +14,7 @@ final class Msg implements MessageQueue
 	public function __construct(
 		private int $permission,
 		private Dir $dir,
+		private Dir $tempDir,
 		private ActiveWait $activeWait,
 		private Lock $mutex,
 		private ?Inotify $inotify = null,
@@ -24,9 +25,10 @@ final class Msg implements MessageQueue
 
 	public function send(InternalMessage $internalMessage): void
 	{
-		$file = $this->dir->filename($internalMessage->id);
+		$file = $this->tempDir->filename($internalMessage->id);
 		file_put_contents($file, $internalMessage->serialized());
 		chmod($file, $this->permission);
+		rename($file, $this->dir->filename($internalMessage->id));
 	}
 
 
