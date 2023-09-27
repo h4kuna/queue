@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+namespace h4kuna\Queue\Tests\Sandbox;
+
+$bus = require __DIR__ . '/config.php';
+
+$bus->dispatch(new MyMessage(/* ... */));
+
+
+
+
