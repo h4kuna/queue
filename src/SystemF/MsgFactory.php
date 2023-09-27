@@ -2,6 +2,7 @@
 
 namespace h4kuna\Queue\SystemF;
 
+use h4kuna\DataType\Iterators\ActiveWait;
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\MessageQueue;
 use h4kuna\Queue\SystemF\Lock\NoLock;

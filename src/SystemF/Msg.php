@@ -3,6 +3,7 @@
 namespace h4kuna\Queue\SystemF;
 
 use Generator;
+use h4kuna\DataType\Iterators\ActiveWait;
 use h4kuna\Dir\Dir;
 use h4kuna\Queue\Config;
 use h4kuna\Queue\MessageQueue;
