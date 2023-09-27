@@ -13,14 +13,16 @@ use h4kuna\Queue\SysvMsg\FtokFactory;
 
 class QueueFactory
 {
+	protected Dir $tempDir;
+
 
 	public function __construct(
 		protected /*readonly*/ int $permission = 0666, // 0o666 from 8.1
-		protected /*readonly*/ ?Dir $tempDir = null,
+		?Dir $tempDir = null,
 		protected /*readonly*/ int $messageSize = MessageQueue::MAX_MESSAGE_SIZE
 	)
 	{
-		$this->tempDir ??= new TempDir();
+		$this->tempDir = $tempDir ?? new TempDir();
 	}
 
 
@@ -29,7 +31,6 @@ class QueueFactory
 		?int $messageSize = null,
 	): Queue
 	{
-		assert($this->tempDir !== null);
 		$queueDir = $this->tempDir->dir($name);
 
 		$oldMessageSize = $this->messageSize;

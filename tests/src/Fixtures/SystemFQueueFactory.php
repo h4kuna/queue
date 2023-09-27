@@ -14,7 +14,6 @@ final class SystemFQueueFactory extends QueueFactory
 		string $name,
 	): MessageQueue
 	{
-		assert($this->tempDir !== null);
 		return (new MsgFactory())->create($this->permission, $queueDir, $this->tempDir);
 	}
 
