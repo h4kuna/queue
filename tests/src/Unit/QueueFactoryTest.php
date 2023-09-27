@@ -18,7 +18,7 @@ final class QueueFactoryTest extends TestCase
 
 	public function testReceive(): void
 	{
-		$queueFactory = new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'));
+		$queueFactory = self::createQueueFactory();
 
 		$queue = $queueFactory->create('my-queue');
 		Assert::same('my-queue', $queue->msg()->name());
@@ -31,7 +31,7 @@ final class QueueFactoryTest extends TestCase
 
 	public function testTryReceive(): void
 	{
-		$queueFactory = new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'));
+		$queueFactory = self::createQueueFactory();
 
 		$size = Queue\Config::MINIMAL_QUEUE_SIZE + 4;
 		$queue = $queueFactory->create('my-queue-receive', messageSize: $size);
@@ -55,6 +55,12 @@ final class QueueFactoryTest extends TestCase
 		Assert::same(4, $queue->count());
 		$queue->consumer()->flush();
 		Assert::same(0, $queue->count());
+	}
+
+
+	private static function createQueueFactory(): Queue\QueueFactory
+	{
+		return new Queue\QueueFactory(tempDir: new Dir(__DIR__ . '/../../temp'), type: Queue\QueueFactory::SYSTEM_V);
 	}
 
 }

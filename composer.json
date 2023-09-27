@@ -38,7 +38,8 @@
   },
   "suggest": {
     "ext-lib": "For compress messages, lobger then 150 chars.",
-    "ext-inotify": "For passive waiting, if you want to use SystemF."
+    "ext-inotify": "For passive waiting, if you want to use SystemF.",
+    "ext-sysvmsg": "For php native msg_* functions aka SystemV."
   },
   "config": {
     "sort-packages": true

@@ -6,20 +6,22 @@ use h4kuna\Dir\Dir;
 use h4kuna\Dir\TempDir;
 use h4kuna\Queue\Msg\Consumer;
 use h4kuna\Queue\Msg\Producer;
-use h4kuna\Queue\SystemV\Backup;
+use h4kuna\Queue\SystemF\MsgFactory;
 use h4kuna\Queue\SystemV\Backup\Filesystem;
-use h4kuna\Queue\SystemV\Msg;
 use h4kuna\Queue\SysvMsg\FtokFactory;
 
 class QueueFactory
 {
+	public const SYSTEM_V = 2;
+
 	protected Dir $tempDir;
 
 
 	public function __construct(
 		protected /*readonly*/ int $permission = 0666, // 0o666 from 8.1
 		?Dir $tempDir = null,
-		protected /*readonly*/ int $messageSize = MessageQueue::MAX_MESSAGE_SIZE
+		protected /*readonly*/ int $messageSize = MessageQueue::MAX_MESSAGE_SIZE,
+		private int $type = 1,
 	)
 	{
 		$this->tempDir = $tempDir ?? new TempDir();
@@ -54,17 +56,26 @@ class QueueFactory
 		string $name,
 	): MessageQueue
 	{
-		$backUp = $this->createBackup($queueDir);
-
-		$ftok = FtokFactory::create($queueDir, $name);
-
-		return new Msg($name, $ftok, $this->permission, $backUp, $this->messageSize);
+		if ($this->type === self::SYSTEM_V) {
+			return $this->createSystemV($queueDir, $name);
+		}
+		return $this->createSystemF($queueDir);
 	}
 
 
-	protected function createBackup(Dir $messageDir): Backup
+	protected function createSystemF(Dir $queueDir): MessageQueue
 	{
-		return new Filesystem($messageDir);
+		return (new MsgFactory())->create($this->permission, $queueDir, $this->tempDir);
+	}
+
+
+	protected function createSystemV(Dir $queueDir, string $name): SystemV\Msg
+	{
+		$backUp = new Filesystem($queueDir);
+
+		$ftok = FtokFactory::create($queueDir, $name);
+
+		return new SystemV\Msg($name, $ftok, $this->permission, $backUp, $this->messageSize);
 	}
 
 }
