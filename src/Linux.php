@@ -43,7 +43,7 @@ final class Linux
 	public static function userGroupToText(int $user, int $group): array
 	{
 		$file = new SplFileObject('/etc/passwd');
-		$file->setCsvControl(':');
+		$file->setCsvControl(':', escape: '');
 		$file->setFlags(SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_AHEAD);
 
 		$users = $groups = [];

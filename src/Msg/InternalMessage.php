@@ -75,13 +75,13 @@ class InternalMessage
 			$this->type,
 			(int) $this->isBlocking,
 			(int) $this->compress,
-		]);
+		], escape: '');
 	}
 
 
 	private static function unserializeCsv(string $content): self
 	{
-		$data = str_getcsv($content);
+		$data = str_getcsv($content, escape: '');
 		assert(isset($data[0], $data[1], $data[2], $data[3], $data[4]));
 		if (boolval($data[4])) {
 			$data[1] = gzuncompress($data[1]);
