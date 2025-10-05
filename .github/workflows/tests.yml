@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ['8.0', '8.1', '8.2']
+        php: ['8.2', '8.3', '8.4']
 
       fail-fast: false
 
@@ -23,7 +23,7 @@ jobs:
       - run: composer install --no-progress --prefer-dist
       - run: composer tests
       - if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: output
           path: tests/**/output
